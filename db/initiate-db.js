@@ -11,15 +11,25 @@ const db = mysql.createConnection({
 
 //create_db.sql must run first, done through child process
 const createDB = path.join(__dirname, 'create_db.sql');
-const command = `mysql -h ${process.env.DB_HOST} -u root -p${process.env.DB_PASSWORD_ROOT} < "${createDB}"`;
+const populateDB = path.join(__dirname, 'populate.sql');
+let command = `mysql -h ${process.env.DB_HOST} -u root -p${process.env.DB_PASSWORD_ROOT} < "${createDB}"`;
 
 exec(command, (err, stdout, stderr) => {
     if (err) {
         console.error(`Error executing create_db.sql file: ${stderr}`);
         return;
     }
-
     console.log(`create_db.sql file executed successfully:\n${stdout}`);
+
+    const populateDB = path.join(__dirname, 'populate_db.sql');
+    let command = `mysql -h ${process.env.DB_HOST} -u root -p${process.env.DB_PASSWORD_ROOT} < "${populateDB}"`;
+    exec(command, (err, stdout, stderr) => {
+        if (err) {
+            console.error(`Error executing populate_db.sql file: ${stderr}`);
+            return;
+        }
+        console.log(`populate_db.sql file executed successfully:\n${stdout}`);
+    });
 
     //on success, create user and grant privileges
     db.connect(err => {

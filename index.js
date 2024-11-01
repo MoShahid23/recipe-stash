@@ -48,5 +48,8 @@ app.locals.data = {siteName: "Recipe Stash"}
 const mainRoutes = require("./routes/main")
 app.use('/', mainRoutes)
 
+const registerRoutes = require("./routes/register")
+app.use('/register', registerRoutes)
+
 //start the web app
 app.listen(port, () => console.log(`Node app listening on port ${port}!`))
