@@ -1,7 +1,8 @@
 //create a new router
 const express = require("express")
 const router = express.Router()
-const bcrypt = require("bcrypt")
+const {body, validationResult } = require('express-validator');
+const bcrypt = require("bcrypt");
 const saltRounds = 10
 
 
@@ -12,22 +13,51 @@ router.get('/',function(req, res){
 
     switch(req.query.formerror){
         case "both":
-            res.render("register.ejs", {formerror:"The username and email entered are in use already.", username:registerForm.username, email:registerForm.email});
+            res.render("register.ejs", {formerror:["The username and email entered are in use already."], username:registerForm.username, email:registerForm.email});
             break;
         case "username":
-            res.render("register.ejs", {formerror:"This username has already been taken.", username:registerForm.username, email:registerForm.email});
+            res.render("register.ejs", {formerror:["This username has already been taken."], username:registerForm.username, email:registerForm.email});
             break;
         case "email":
-            res.render("register.ejs", {formerror:"This email has already been registered.", username:registerForm.username, email:registerForm.email});
+            res.render("register.ejs", {formerror:["This email has already been registered."], username:registerForm.username, email:registerForm.email});
+            break
+        case "validation":
+            res.render("register.ejs", {formerror:registerForm.errors, username:registerForm.username, email:registerForm.email});
             break
         default:
             res.render("register.ejs");
+            break;
     }
 })
 
-router.post('/submit',function(req, res){
-    var email = req.body.email;
-    var username = req.body.username;
+router.post('/submit',[
+// Validation rules
+body('username').isLength(2).withMessage('Username must be at least 2 characters long').isAlphanumeric().withMessage('Username must be alphanumeric'),
+body('email').isEmail().withMessage('Please provide a valid email'),
+body('password').isStrongPassword({
+    minLength: 8,
+    minLowercase: 1,
+    minUppercase: 1,
+    minNumbers: 2,
+    minSymbols: 1,
+}).withMessage('Password must be at least 10 characters long and include a mix of upper and lowercase, 2 numbers, and 1 symbol')
+],(req, res) => {
+    const errors = validationResult(req);
+    const username = req.body.username
+    const email = req.body.email
+
+    // If there are validation errors
+    if (!errors.isEmpty()) {
+        // Store error messages and form data in session
+        req.session.registerForm = {
+            username,
+            email,
+            errors: errors.array().map(err => err.msg) // Array of error messages
+        };
+
+        // Redirect with formerror query
+        return res.redirect('/register?formerror=validation');
+    }
 
     let checkQuery = `
         SELECT
@@ -46,8 +76,12 @@ router.post('/submit',function(req, res){
         if (results.length === 0) {
 
             bcrypt.hash(req.body.password, saltRounds, function(err, hashedPassword) {
-                let query = `INSERT INTO users(username, email, password) VALUES("${username}", "${email}", "${hashedPassword}");`;
-                db.query(query, (err, result) => {
+                if (err) {
+                    console.error(err);
+                    return res.send('There was an error processing your request.');
+                }
+                let query = `INSERT INTO users(username, email, password) VALUES(?, ?, ?);`;
+                db.query(query, [username, email, hashedPassword], (err, result) => {
                     if (err) {
                         console.error(err)
                         res.send('There was an error processing your request.')
@@ -75,6 +109,30 @@ router.post('/submit',function(req, res){
             }
         }
     });
-})
+});
+
+router.post('/taken', (req, res) => {
+    const username = req.body.username;
+    console.log(username);
+
+    let checkQuery = `
+        SELECT username
+        FROM users
+        WHERE username = ?
+    `;
+
+    db.query(checkQuery, [username], (err, results) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).send({ error: 'Database query error' }); // Handle error properly
+        }
+
+        if (results.length > 0) {
+            res.send({ taken: true });
+        } else {
+            res.send({ taken: false });
+        }
+    });
+});
 
 module.exports = router

@@ -11,6 +11,7 @@ app.set('view engine', 'ejs')
 
 //body parser
 app.use(express.urlencoded({ extended: true }))
+app.use(express.json());
 
 //set up public folder
 app.use(express.static(__dirname + '/public'))
@@ -50,6 +51,9 @@ app.use('/', mainRoutes)
 
 const registerRoutes = require("./routes/register")
 app.use('/register', registerRoutes)
+
+const loginRoutes = require("./routes/login")
+app.use('/login', loginRoutes)
 
 //start the web app
 app.listen(port, () => console.log(`Node app listening on port ${port}!`))

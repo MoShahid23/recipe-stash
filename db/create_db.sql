@@ -19,3 +19,27 @@ CREATE TABLE IF NOT EXISTS recipes (
     author_id INT NOT NULL,
     FOREIGN KEY (author_id) REFERENCES users(id) ON DELETE CASCADE
 );
+
+
+DELIMITER $$
+
+CREATE PROCEDURE getRecipes(IN tags VARCHAR(255))
+BEGIN
+    SET @sql_query = 'SELECT r.title, r.published, r.description, r.ingredients, u.username
+                      FROM recipes AS r
+                      JOIN users AS u ON r.author_id = u.id';
+
+    -- Check if tags are provided
+    IF tags IS NOT NULL AND tags != '' THEN
+        SET @sql_query = CONCAT(@sql_query, ' WHERE r.tags IN (', tags, ')');
+    END IF;
+
+    SET @sql_query = CONCAT(@sql_query, ' ORDER BY r.published DESC');
+
+    -- Prepare and execute the dynamic SQL
+    PREPARE stmt FROM @sql_query;
+    EXECUTE stmt;
+    DEALLOCATE PREPARE stmt;
+END$$
+
+DELIMITER ;

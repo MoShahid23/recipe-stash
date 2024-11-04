@@ -1,11 +1,95 @@
-<!doctype html>
+<!DOCTYPE html>
+<html lang="en">
 <html>
-  <head>
-    <title>Welcome to <%=data.siteName%></title>
-    <!-- <link rel="stylesheet"  type="text/css" href="/main.css" /> -->
-  </head>
-  <body>
-    <h1>Welcome to <%=data.siteName%></h1>
-    <a href="/register">Login or Register</a>
-  </body>
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Welcome to <%=data.siteName%></title>
+        <link rel="stylesheet" href="css/styles.css">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    </head>
+    <body>
+        <div class="header">
+            <a href="/" class="logo"><span><%=data.siteName.replace(" ","")%></span></a>
+            <span class="options">options</span>
+            <%if(loggedIn){%>
+                <div class="account"><%username%></div>
+            <%}else{%>
+                <a href="/login" class="account">Login or Register</a>
+            <%}%>
+        </div>
+
+        <div class="content">
+            <div class="content-side left">
+                <h1>Today's additions</h1>
+                <%for(let post of recipes){%>
+                    <div class="post-div">
+                        <a href="" class="post">
+                            <div class="title">
+                                <h2><%=post.title%></h2>
+                            </div>
+                            <div class="description">
+                                <h3><%=post.description%></h3>
+                            </div>
+                            <div class="ingredients">
+                                <%=post.ingredients%>
+                            </div>
+                            <div class="details">
+                                <div class="timestamp"><%=new Date(post.published).toLocaleString()%></div>
+                                <div class="username">by: <%=post.username%></div>
+                            </div>
+                        </a>
+                    </div>
+                <%}%>
+            </div>
+            <div class="content-side right">
+                <%if(loggedIn){%>
+                    <h1>For you</h1>
+                    <%recipes.reverse()%>
+                    <%for(let post of recipes){%>
+                        <div class="post-div">
+                            <a href="" class="post">
+                                <div class="title">
+                                    <h2><%=post.title%></h2>
+                                </div>
+                                <div class="description">
+                                    <h3><%=post.description%></h3>
+                                </div>
+                                <div class="ingredients">
+                                    <%=post.ingredients%>
+                                </div>
+                                <div class="details">
+                                    <div class="timestamp"><%=new Date(post.published).toLocaleString()%></div>
+                                    <div class="username">by: <%=post.username%></div>
+                                </div>
+                            </a>
+                        </div>
+                    <%}%>
+                <%}else{%>
+                    <div class="unregistered">
+                        <span><a href="/register">Register now</a> to <br>customize your feed,<br>save recipes, and</span>
+                        <div class="post-div">
+                            <a href="/register" class="post">
+                                <div class="title">
+                                    <h2>Share your own recipes</h2>
+                                </div>
+                                <div class="description">
+                                    <h3>concocted of various</h3>
+                                </div>
+                                <div class="ingredients">
+                                    delicious ingredients
+                                </div>
+                                <div class="details">
+                                    <div class="timestamp">Today</div>
+                                    <div class="username">by: you</div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                <%}%>
+            </div>
+        </div>
+    </body>
 </html>

@@ -37,14 +37,15 @@
                 background-color: black;
                 padding: 3px;
                 font-weight: lighter;
-                font-size: 0.8em;
+                font-size: 0.6em;
+                max-width: 40%;
             }
 
             .fields{
                 display: grid;
                 color: yellow;
                 font-weight: lighter;
-                font-size: 0.8em;
+                font-size: 0.6em;
 
                 border: black solid 4px;
                 background-color:rgb(91, 94, 94);
@@ -53,7 +54,7 @@
             }
 
             .fields input{
-                border: 4px yellow solid;
+                border: 4px slategray solid;
                 width: 250px;
                 height: 30px;
                 margin-bottom: 3vh;
@@ -85,7 +86,7 @@
                 width: 150px;
                 height: 35px;
                 padding: 1px 2px;
-                border: 4px yellow solid;
+                border: 4px black solid;
                 margin: 0 auto;
                 font: inherit;
                 font-size: 20px;
@@ -99,24 +100,45 @@
                 border: 4px yellowgreen solid;
                 color: yellowgreen;
             }
+            .fields a{
+                margin-top: 25px;
+                font-size: 0.8em;
+                text-align: right;
+                color: white;
+                text-decoration: none;
+            }
+            .fields a:hover{
+                color: yellow;
+                text-decoration: underline;
+            }
+            #usernameAvailability{
+                color: white;
+                font-size: 0.8em;
+                margin-top: -3vh;
+                text-align: center;
+            }
         </style>
     </head>
 
     <body>
         <h1>Register to <%= data.siteName %></h1>
         <% if (typeof formerror !== 'undefined' && formerror) { %>
-            <h2 class="error"><%= formerror %></h2>
-        <% } else{formerror = false}%>
+            <% for(let item of formerror){ %>
+                <h2 class="error"><%= item %></h2>
+        <% }} else{formerror = false} %>
+
         <form class="fields" method="post" action="/register/submit">
             <span>Username: </span>
-            <input id="username" name="username" type="text" spellcheck="false" autocomplete="username" required <%if(formerror){%>value="<%=username%>"<%}%>>
+            <input id="username" name="username" type="text" spellcheck="false" required <%if(formerror){%>value="<%=username%>"<%}%>>
+            <span id="usernameAvailability"></span>
 
             <span>Email Address: </span>
-            <input id="email" name="email" type="email" spellcheck="false" autocomplete="email" required <%if(formerror){%>value="<%=email%>"<%}%>>
+            <input id="email" name="email" type="email" spellcheck="false" autocomplete="username" required <%if(formerror){%>value="<%=email%>"<%}%>>
 
             <span>Password: <button type="button" id="show-password">show</button></span>
             <input id="password" name="password" type="password" autocomplete="current-password" required>
-            <button type="submit">Register</button>
+            <button id="submit" type="submit">Register</button>
+            <a href="/login">Need to login?</a>
         </form>
     </body>
 
@@ -134,5 +156,42 @@
                 showPassword.innerText = "show";
             }
         })
+
+        const checkUsernameAvailability = async (username) => {
+            try {
+                const response = await fetch('/register/taken', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({username:username})
+                });
+                const data = await response.json();
+                console.log(data)
+                console.log(username)
+                if (data.taken) {
+                    document.getElementById('usernameAvailability').innerText = 'This username has already been taken'
+                    document.getElementById('username').style.borderColor = 'red'
+                    document.getElementById("submit").setAttribute("disabled", "true")
+                    document.getElementById("submit").style.opacity = "0.7"
+                    document.getElementById("submit").style.cursor = "not-allowed"
+
+                }
+                else{
+                    document.getElementById('usernameAvailability').innerText = ''
+                    document.getElementById('username').style.borderColor = 'black'
+                    document.getElementById("submit").setAttribute("disabled", "false")
+                    document.getElementById("submit").style.opacity = "1"
+                    document.getElementById("submit").style.cursor = "pointer"
+                }
+            } catch (error) {
+                console.error('Error checking username availability:', error);
+            }
+        };
+
+        // Usage (e.g., on input change)
+        document.getElementById('username').addEventListener('input', (event) => {
+            checkUsernameAvailability(event.target.value);
+        });
     </script>
 </html>
