@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Create a post - <%=data.siteName%></title>
+        <link rel="stylesheet" href="/css/styles.css">
+        <link rel="stylesheet" href="/css/single.css">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    </head>
+    <body>
+        <!--header from partials-->
+        <%- include('partials/header') %>
+        <!--header from partials-->
+
+        <div class="content">
+            <div class="content-side left">
+                <h1>Writing a recipe</h1>
+                <% if (typeof formerror !== 'undefined' && formerror) { %>
+                    <% for(let item of formerror){ %>
+                        <h2 class="error"><%= item %></h2>
+                <% }} else{formerror = false} %>
+
+                <form class="fields" id="recipeForm" method="post" action="/register/submit">
+                    <span>Title* </span>
+                    <input id="title" name="title" type="text" spellcheck="true" required placeholder="A simple title" <%if(formerror){%>value="<%=username%>"<%}%>>
+                    <span id="usernameAvailability"></span>
+                
+                    <span>Description*</span>
+                    <input id="description" name="description" type="text" spellcheck="true" required placeholder="A brief description" <%if(formerror){%>value="<%=email%>"<%}%>>
+                
+                    <span>Ingredients and amounts* </span>
+                    <div class="ingredient-manager" id="ingredientManager">
+                        <div class="ingredient-add">
+                            <input type="text" class="ingredient" placeholder="what's it called?" required>
+                            <input type="text" class="quantity" placeholder="how much?" required>
+                            <button style="visibility: hidden;"> </button>
+                        </div>
+                    </div>
+                    <button type="button" id="addIngredient">＋ Add</button>
+
+                    <span>Instructions*</span>
+                    <textarea id="instructions" name="instructions" type="text" spellcheck="true" required placeholder="Detailed instructions" <%if(formerror){%>value="<%=email%>"<%}%>></textarea>
+
+                    <span>Tags</span>
+                    <input id="tags" name="tags" type="text" placeholder="optional tags, separated by commas" required>
+                    <button id="submit" type="submit">Post recipe</button>
+                </form>
+            </div>
+            <div class="content-side right">
+                <h2>Preview</h2>
+
+                <div class="full-post">
+                    <div class="post-div">
+                        <div class="post">
+                            <span id="tags-display"></span>
+                            <div class="details">
+                                <div class="timestamp"><%=new Date(Date.now()).toLocaleString()%></div>
+                                <div class="username">by: you</div>
+                            </div>
+                            <div class="title">
+                                <h2>A simple title</h2>
+                            </div>
+                            <div class="description">
+                                <h3>A brief description</h3>
+                            </div>
+                            <div class="body">
+                                <div class="ingredients">
+                                    <h4>Ingredients:</h4>
+                                    All the ingredients needed
+                                </div>
+                                <div class="instructions">
+                                    <h4>Instructions:</h4>
+                                    Detailed instructions
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+    <script>
+        function updatePreview() {
+            // Grab input values
+            const titleValue = document.getElementById("title").value;
+            const descriptionValue = document.getElementById("description").value;
+            const instructionsValue = document.getElementById("instructions").value;
+            const tagValues = document.getElementById("tags").value || "";
+
+            // Replace line breaks with <br> tags for textarea content
+            const formatText = (text) => text.replace(/\n/g, "<br>");
+
+            // Update the corresponding preview elements
+            document.querySelector(".post .title h2").textContent = titleValue || "A simple title";
+            document.querySelector(".post .description h3").textContent = descriptionValue || "A brief description";
+            document.querySelector(".post .instructions").innerHTML = "<h4>Instructions:</h4>"+formatText(instructionsValue) || "<h4>Instructions:</h4>Detailed instructions";
+            document.querySelector("#tags-display").innerHTML = ""
+            for(let tag of tagValues.split(",")){
+                document.querySelector("#tags-display").innerHTML += `<span class="tag">${tag.trim()}</span>`
+            }
+
+        }
+
+        const textareaList = document.querySelectorAll('textarea');
+
+        textareaList.forEach(textarea => {
+            textarea.addEventListener('input', () => {
+                textarea.style.height = 'auto';
+                textarea.style.height = `${textarea.scrollHeight}px`;
+            });
+        });
+
+        document.getElementById("title").addEventListener("input", updatePreview);
+        document.getElementById("description").addEventListener("input", updatePreview);
+        document.getElementById("instructions").addEventListener("input", updatePreview);
+        document.getElementById("tags").addEventListener("input", updatePreview);
+
+        // Function to update the ingredient JSON and display it
+        function updateIngredients() {
+            const ingredientsJson = [];
+            const ingredientAdds = document.querySelectorAll('.ingredient-add');
+
+            ingredientAdds.forEach(add => {
+                const ingredientInput = add.querySelector('.ingredient');
+                const quantityInput = add.querySelector('.quantity');
+
+                // Only push valid entries
+                if (ingredientInput.value.trim() && quantityInput.value.trim()) {
+                    ingredientsJson.push({
+                        ingredient: ingredientInput.value.trim(),
+                        quantity: quantityInput.value.trim()
+                    });
+                }
+            });
+
+            // Update the ingredients display
+            const ingredientsDisplay = document.querySelector('.ingredients');
+            ingredientsDisplay.innerHTML = '<h4>Ingredients:</h4>'; // Clear previous display
+
+            ingredientsJson.forEach(item => {
+                const ingredientDiv = document.createElement('div');
+                ingredientDiv.className = 'ingredient';
+                ingredientDiv.textContent = `${item.ingredient}, ${item.quantity}`;
+                ingredientsDisplay.appendChild(ingredientDiv);
+            });
+        }
+
+        // Function to validate input fields
+        function validateInput(input) {
+            const regex = /^[a-zA-Z0-9\s]+$/; // Allow alphanumeric and spaces
+            if (!regex.test(input.value)) {
+                input.classList.add('invalid');
+                return false;
+            } else {
+                input.classList.remove('invalid');
+                return true;
+            }
+        }
+
+        // Function to create a new ingredient add div
+        function createIngredientAdd() {
+            const ingredientAddDiv = document.createElement('div');
+            ingredientAddDiv.className = 'ingredient-add';
+
+            const ingredientInput = document.createElement('input');
+            ingredientInput.type = 'text';
+            ingredientInput.className = 'ingredient';
+            ingredientInput.placeholder = "what's it called?";
+            ingredientInput.required = true;
+
+            const quantityInput = document.createElement('input');
+            quantityInput.type = 'text';
+            quantityInput.className = 'quantity';
+            quantityInput.placeholder = "how much?";
+            quantityInput.required = true;
+
+            const removeButton = document.createElement('button');
+            removeButton.type = 'button';
+            removeButton.className = 'removeIngredient';
+            removeButton.innerText = 'x';
+
+            // Remove ingredient add div on button click
+            removeButton.addEventListener('click', () => {
+                ingredientAddDiv.remove();
+                updateIngredients(); // Update the ingredient display after removal
+            });
+
+            ingredientInput.addEventListener('input', updateIngredients);
+            quantityInput.addEventListener('input', updateIngredients);
+
+            ingredientAddDiv.appendChild(ingredientInput);
+            ingredientAddDiv.appendChild(quantityInput);
+            ingredientAddDiv.appendChild(removeButton);
+
+            document.getElementById('ingredientManager').appendChild(ingredientAddDiv);
+        }
+
+        // Add new ingredient add div
+        document.getElementById('addIngredient').addEventListener('click', createIngredientAdd);
+
+        // Initial input listeners for the first ingredient pair
+        document.querySelectorAll('.ingredient-add input').forEach(input => {
+            input.addEventListener('input', updateIngredients);
+        });
+
+        // Validate inputs and create JSON on form submit
+        document.getElementById('recipeForm').addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent default form submission
+
+            const ingredientsJson = [];
+            const ingredientAdds = document.querySelectorAll('.ingredient-add');
+
+            let validForm = true; // Flag to check overall form validity
+
+            ingredientAdds.forEach(add => {
+                const ingredientInput = add.querySelector('.ingredient');
+                const quantityInput = add.querySelector('.quantity');
+
+                // Validate both fields
+                const ingredientValid = validateInput(ingredientInput);
+                const quantityValid = validateInput(quantityInput);
+                validForm = validForm && ingredientValid && quantityValid;
+
+                if (ingredientValid && quantityValid) {
+                    ingredientsJson.push({
+                        ingredient: ingredientInput.value.trim(),
+                        quantity: quantityInput.value.trim()
+                    });
+                }
+            });
+
+            if (!validForm) {
+                alert('Please correct the invalid fields.');
+                return;
+            }
+
+            console.log('Ingredients JSON:', JSON.stringify(ingredientsJson)); // Log JSON for verification
+            // Submit the form data here, e.g. using fetch or similar
+        });
+    </script>
+</html>

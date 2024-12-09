@@ -55,5 +55,11 @@ app.use('/register', registerRoutes)
 const loginRoutes = require("./routes/login")
 app.use('/login', loginRoutes)
 
+const createRoutes = require("./routes/create")
+app.use('/create', createRoutes)
+
+const usersRoutes = require("./routes/users")
+app.use('/users', usersRoutes)
+
 //start the web app
 app.listen(port, () => console.log(`Node app listening on port ${port}!`))

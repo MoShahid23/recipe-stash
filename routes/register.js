@@ -5,24 +5,37 @@ const {body, validationResult } = require('express-validator');
 const bcrypt = require("bcrypt");
 const saltRounds = 10
 
+router.get('/', function(req, res){
+    let renderData = {};
+    renderData.loggedIn = req.session.userId ? true : false;
 
-router.get('/',function(req, res){
+    //redirect to main page if already authenticated
+    if(renderData.loggedIn){
+        return res.redirect("/");
+    }
+
     var registerForm = req.session.registerForm || {};
     req.session.registerForm = null;
-    console.log(req.query.formerror)
+
+    renderData.username = registerForm.username;
+    renderData.email = registerForm.email;
 
     switch(req.query.formerror){
         case "both":
-            res.render("register.ejs", {formerror:["The username and email entered are in use already."], username:registerForm.username, email:registerForm.email});
+            renderData.formerror = ["The username and email entered are in use already."];
+            res.render("register.ejs", renderData);
             break;
         case "username":
-            res.render("register.ejs", {formerror:["This username has already been taken."], username:registerForm.username, email:registerForm.email});
+            renderData.formerror = ["This username has already been taken."];
+            res.render("register.ejs", renderData);
             break;
         case "email":
-            res.render("register.ejs", {formerror:["This email has already been registered."], username:registerForm.username, email:registerForm.email});
+            renderData.formerror = ["This email has already been registered."];
+            res.render("register.ejs", renderData);
             break
         case "validation":
-            res.render("register.ejs", {formerror:registerForm.errors, username:registerForm.username, email:registerForm.email});
+            renderData.formerror = registerForm.errors;
+            res.render("register.ejs", renderData);
             break
         default:
             res.render("register.ejs");
@@ -45,6 +58,8 @@ body('password').isStrongPassword({
     const errors = validationResult(req);
     const username = req.body.username
     const email = req.body.email
+
+    console.log("", username, email);
 
     // If there are validation errors
     if (!errors.isEmpty()) {

@@ -13,7 +13,8 @@ router.get('/', function(req, res) {
             return res.render("main.ejs", {
                 notif: 'There was an error retrieving recipes, please try again later.',
                 loggedIn,
-                recipes: [] // Return an empty array or any default value
+                recipes: [], // Return an empty array or any default value
+                username: req.session.userId
             });
         }
 
@@ -25,18 +26,20 @@ router.get('/', function(req, res) {
                 res.render("main.ejs", {
                     notif: "Thank you for registering! You have been logged in automatically.",
                     loggedIn,
-                    recipes
+                    recipes,
+                    username: req.session.userId
                 });
                 break;
             case "loggedin":
                 res.render("main.ejs", {
                     notif: `Welcome back, ${req.session.userId}`,
                     loggedIn,
-                    recipes
+                    recipes,
+                    username: req.session.userId
                 });
                 break;
             default:
-                res.render("main.ejs", { recipes, loggedIn });
+                res.render("main.ejs", { recipes, loggedIn, username: req.session.userId });
         }
     });
 });

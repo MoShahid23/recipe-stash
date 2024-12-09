@@ -1,147 +1,44 @@
 <!DOCTYPE html>
-<html lang= "en">
-
+<html lang="en">
     <head>
-        <meta charset="utf-8">
-        <link rel="shortcut icon" href="./images/fav-icon.png" type="image/x-icon">
-        <title>Register - <%= data.siteName %></title>
-
-        <style>
-            html{
-                height: 100%;
-                width: 100%;
-            }
-            body{
-                height: 100%;
-                width: 100%;
-                background-color:slategray;
-
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: center;
-
-                font-family:Arial, Helvetica, sans-serif;
-                font-size: 1.8em;
-            }
-
-            h1{
-                font: inherit;
-                color: yellow;
-                font-weight: bold;
-            }
-
-            h2.error{
-                display: grid;
-                color: #d66060;
-                background-color: black;
-                padding: 3px;
-                font-weight: lighter;
-                font-size: 0.6em;
-                max-width: 40%;
-            }
-
-            .fields{
-                display: grid;
-                color: yellow;
-                font-weight: lighter;
-                font-size: 0.6em;
-
-                border: black solid 4px;
-                background-color:rgb(91, 94, 94);
-                padding: 1%;
-                border-radius: 10px;
-            }
-
-            .fields input{
-                border: 4px slategray solid;
-                width: 250px;
-                height: 30px;
-                margin-bottom: 3vh;
-                border-radius: 10px;
-                padding-left: 10px;
-                text-align: left;
-            }
-
-            .fields input:focus{
-                border: 4px yellowgreen solid;
-                outline: none;
-            }
-
-            #show-password{
-                color: yellow;
-                margin-left: 60px;
-                border: none;
-                width: auto;
-                height: auto;
-                border-radius: 0;
-                background-color: transparent;
-                justify-content: end;
-            }
-            #show-password:hover{
-                color: yellowgreen;
-            }
-
-            .fields button{
-                width: 150px;
-                height: 35px;
-                padding: 1px 2px;
-                border: 4px black solid;
-                margin: 0 auto;
-                font: inherit;
-                font-size: 20px;
-                font-weight: lighter;
-                float: right;
-
-                background-color: white;
-                border-radius: 10px;
-            }
-            .fields button:hover{
-                border: 4px yellowgreen solid;
-                color: yellowgreen;
-            }
-            .fields a{
-                margin-top: 25px;
-                font-size: 0.8em;
-                text-align: right;
-                color: white;
-                text-decoration: none;
-            }
-            .fields a:hover{
-                color: yellow;
-                text-decoration: underline;
-            }
-            #usernameAvailability{
-                color: white;
-                font-size: 0.8em;
-                margin-top: -3vh;
-                text-align: center;
-            }
-        </style>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Register - <%=data.siteName%></title>
+        <link rel="stylesheet" href="css/styles.css">
+        <link rel="stylesheet" href="/css/single.css">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
     </head>
-
     <body>
-        <h1>Register to <%= data.siteName %></h1>
-        <% if (typeof formerror !== 'undefined' && formerror) { %>
-            <% for(let item of formerror){ %>
-                <h2 class="error"><%= item %></h2>
-        <% }} else{formerror = false} %>
+        <!--header from partials-->
+        <%- include('partials/header') %>
+        <!--header from partials-->
 
-        <form class="fields" method="post" action="/register/submit">
-            <span>Username: </span>
-            <input id="username" name="username" type="text" spellcheck="false" required <%if(formerror){%>value="<%=username%>"<%}%>>
-            <span id="usernameAvailability"></span>
-
-            <span>Email Address: </span>
-            <input id="email" name="email" type="email" spellcheck="false" autocomplete="username" required <%if(formerror){%>value="<%=email%>"<%}%>>
-
-            <span>Password: <button type="button" id="show-password">show</button></span>
-            <input id="password" name="password" type="password" autocomplete="current-password" required>
-            <button id="submit" type="submit">Register</button>
-            <a href="/login">Need to login?</a>
-        </form>
+        <div class="content">
+            <div class="form-only">
+                <h1>Register</h1>
+                <% if (typeof formerror !== 'undefined' && formerror) { %>
+                    <% for(let item of formerror){ %>
+                        <h2 class="error"><%= item %></h2>
+                <% }} else{formerror = false} %>
+    
+                <form class="fields" method="post" action="/register/submit">
+                    <span>Username: </span>
+                    <input id="username" name="username" type="text" spellcheck="false" required <%if(formerror){%>value="<%=username%>"<%}%>>
+                    <span id="usernameAvailability"></span>
+    
+                    <span>Email Address: </span>
+                    <input id="email" name="email" type="email" spellcheck="false" autocomplete="username" required <%if(formerror){%>value="<%=email%>"<%}%>>
+    
+                    <span>Password: <button type="button" id="show-password">show</button></span>
+                    <input id="password" name="password" type="password" autocomplete="current-password" required>
+                    <button id="submit" type="submit">Register</button>
+                    <a href="/login">Need to login?</a>
+                </form>
+            </div>
+        </div>
     </body>
-
     <script>
         let passwordField = document.getElementById("password")
         let showPassword = document.getElementById("show-password");
@@ -179,8 +76,8 @@
                 }
                 else{
                     document.getElementById('usernameAvailability').innerText = ''
-                    document.getElementById('username').style.borderColor = 'black'
-                    document.getElementById("submit").setAttribute("disabled", "false")
+                    document.getElementById('username').style.borderColor = '#C57B57'
+                    document.getElementById("submit").removeAttribute("disabled")
                     document.getElementById("submit").style.opacity = "1"
                     document.getElementById("submit").style.cursor = "pointer"
                 }

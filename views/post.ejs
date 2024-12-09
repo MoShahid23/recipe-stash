@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title><%=post.title||"Error"%></title>
+        <link rel="stylesheet" href="/css/styles.css">
+        <link rel="stylesheet" href="/css/single.css">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    </head>
+    <body>
+        <!--header from partials-->
+        <%- include('partials/header') %>
+        <!--header from partials-->
+        <div class="content">
+            <%if(typeof error !== 'undefined'){%>
+                <h1><%=error%></h1>
+            <%}else{%>
+                <div class="full-post">
+                    <div class="post-div">
+                        <div class="post">
+                            <div class="details">
+                                <div class="timestamp"><%=new Date(post.published).toLocaleString()%></div>
+                                <div class="username">by: <%=post.username%></div>
+                            </div>
+                            <div class="title">
+                                <h2><%=post.title%></h2>
+                            </div>
+                            <div class="description">
+                                <h3><%=post.description%></h3>
+                            </div>
+                            <div class="body">
+                                <div class="ingredients">
+                                    <h4>Ingredients:</h4>
+                                    <%for(let ingredient of post.ingredients.split(",")){%>
+                                        <div class="ingredient">
+                                            <%=ingredient%>
+                                        </div>
+                                    <%}%>
+                                </div>
+                                <div class="instructions">
+                                    <h4>Instructions:</h4>
+                                    <%=post.instructions%>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            <%}%>
+        </div>
+    </body>
+</html>

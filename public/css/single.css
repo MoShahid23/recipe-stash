@@ -1,0 +1,212 @@
+.content {
+    justify-content: center;
+    align-self: center;
+    width: 100%;
+}
+
+.content .left{
+    width: 55%!important;
+}
+.content .right{
+    width: 45%!important;
+}
+
+.content .full-post{
+    width: calc(100% - 20px);
+    margin-left: 20px;
+}
+
+.content .full-post .post-div{
+    min-width: 60%;
+    margin: 0 auto;
+}
+
+.content .full-post .post-div .post .body{
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+}
+.content .full-post .post-div .post .body > div{
+    width: 50%;
+    font-size:initial;
+}
+.content .full-post .post-div .post .body .ingredient{
+    border-bottom: 0.5px solid #C57B57;
+    border-top: 0.5px solid #C57B57;
+    width: 90%;
+}
+.content .full-post .post-div .post .body div h4{
+    color: #C57B57;
+}
+
+.content .form-only{
+    width: 300px;
+    margin: 0 auto;
+    display: block;
+}
+
+h2.error{
+    animation: shake 0.5s ease;
+    color: #302F4D;
+    background-color: #C57B57;
+    padding: 3px;
+    font-weight: lighter;
+    font-size: 12px;
+    font-weight: bold;
+    border-radius: 5px;
+}
+
+.content .left .fields{
+    width: calc(100% - 20px);
+}
+
+.fields{
+    display: grid;
+    color: #C2CFB2;
+    font-weight: lighter;
+    font-size: 20px;
+    width: auto;
+
+    background-color: #143109;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: left;
+    font-weight: bold;
+}
+
+.fields input, textarea{
+    border: 2px #C57B57 solid;
+    background-color: #C2CFB2;
+    color: #143109;
+    width: 100%;
+    max-width: 100%;
+    padding: 10px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+    padding-left: 10px;
+    text-align: left;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    -ms-border-radius: 5px;
+    -o-border-radius: 5px;
+}
+.fields textarea{
+    height: auto;
+    resize: vertical;
+    min-height: 100px;
+}
+
+.fields input:focus{
+    outline: none;
+    border: solid #C2CFB2 2px;
+}
+
+#show-password{
+    color: #C57B57;
+    margin-left: 60px;
+    border: none;
+    width: auto;
+    height: auto;
+    border-radius: 0;
+    background-color: transparent;
+    justify-content: end;
+}
+#show-password:hover{
+    color: #C2CFB2;
+}
+
+.fields button{
+    width: 150px;
+    height: 35px;
+    padding: 1px 2px;
+    border: 2px #C57B57 solid;
+    background-color: #302F4D;
+    color: #C2CFB2;
+    margin: 0 auto;
+    font: inherit;
+    font-size: 20px;
+    font-weight: lighter;
+    float: right;
+    border-radius: 5px;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    -ms-border-radius: 5px;
+    -o-border-radius: 5px;
+}
+.fields button:hover{
+    border: 2px #C2CFB2 solid;
+    background-color: #C57B57;
+}
+.fields a{
+    margin-top: 25px;
+    font-size: 0.8em;
+    text-align: right;
+    color: #C2CFB2;
+    text-decoration: none;
+}
+.fields a:hover{
+    color: #C57B57;
+    text-decoration: underline;
+}
+
+.fields .ingredient-manager{
+    display: flex;
+    flex-direction: column;
+}
+.fields .ingredient-manager .ingredient-add{
+    display: flex;
+    flex-direction: row;
+    margin-bottom: 5px;
+    height: 40px;
+}
+.fields .ingredient-manager .ingredient-add input{
+    background-color: #302F4D;
+    color: #C2CFB2;
+    border-color: #C2CFB2;
+    margin-right: 10px;
+    margin-bottom: 0;
+    flex: 1;
+}
+.fields .ingredient-manager .ingredient-add button{
+    background-color: #302F4D;
+    border-color: #C2CFB2;
+    flex: 0.2;
+    height: auto;
+    transition: all 0.5s;
+    -webkit-transition: all 0.5s;
+    -moz-transition: all 0.5s;
+    -ms-transition: all 0.5s;
+    -o-transition: all 0.5s;
+}
+.fields .ingredient-manager .ingredient-add button:hover{
+    background-color: #143109;
+    border-color: #C57B57;
+    flex: 0.2;
+    height: auto;
+    transform: scale(1.05);
+    -webkit-transform: scale(1.05);
+    -moz-transform: scale(1.05);
+    -ms-transform: scale(1.05);
+    -o-transform: scale(1.05);
+}
+.fields .ingredient-manager + button{
+    margin: 0;
+    margin-top: 5px;
+    margin-left: auto;
+    width: 100px;
+    border-color: #C2CFB2;
+}
+
+#usernameAvailability{
+    color: #C2CFB2;
+    font-size: 12px;
+    margin-top: -3vh;
+    text-align: center;
+}
+
+@keyframes shake {
+    0% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); }
+    20%, 40%, 60%, 80% { transform: translateX(10px); }
+    100% { transform: translateX(0); }
+}

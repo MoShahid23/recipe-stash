@@ -6,15 +6,26 @@ const bcrypt = require("bcrypt");
 const saltRounds = 10
 
 router.get('/',function(req, res){
+    let renderData = {};
+    renderData.loggedIn = req.session.userId ? true : false;
+
+    if(renderData.loggedIn){
+       return res.redirect("/");
+    }
+
     var loginForm = req.session.loginForm || {};
     req.session.loginForm = null;
 
+    renderData.email = loginForm.email;
+
     switch(req.query.formerror){
         case "invalid":
-            res.render("login.ejs", {formerror:["Invalid username or password."], email:loginForm.email});
+            renderData.formerror = ["Invalid username or password."];
+            res.render("login.ejs", renderData);
             break
         case "error":
-            res.render("login.ejs", {formerror:["There was an error processing your request, please try again later."], email:loginForm.email});
+            renderData.formerror = ["There was an error processing your request, please try again later."];
+            res.render("login.ejs", renderData);
             break
         default:
             res.render("login.ejs");
