@@ -30,6 +30,10 @@
     width: 50%;
     font-size:initial;
 }
+.content .full-post .post-div .post .body .ingredients{
+    max-height: unset;
+    text-wrap: unset;
+}
 .content .full-post .post-div .post .body .ingredient{
     border-bottom: 0.5px solid #C57B57;
     border-top: 0.5px solid #C57B57;

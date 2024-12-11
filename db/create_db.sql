@@ -79,4 +79,64 @@ BEGIN
     GROUP BY r.id;
 END$$
 
+DELIMITER $$
+
+CREATE PROCEDURE addSpoonacularRecipe(
+    IN rTitle VARCHAR(255),
+    IN description TEXT,
+    IN ingredients TEXT,
+    IN instructions TEXT,
+    IN published TIMESTAMP,
+    IN rUsername VARCHAR(255),
+    IN tags TEXT
+)
+BEGIN
+    DECLARE authorId INT;
+    DECLARE tagName VARCHAR(50);
+    DECLARE tagStart INT DEFAULT 1;
+    DECLARE tagEnd INT;
+    DECLARE tagId INT;
+    DECLARE recipeId INT;
+
+    SELECT id INTO authorId
+    FROM users
+    WHERE username = rUsername;
+
+    IF NOT EXISTS (
+        SELECT 1
+        FROM recipes
+        WHERE title = rTitle AND author_id = authorId
+    ) THEN
+        INSERT INTO recipes (title, description, ingredients, instructions, published, author_id)
+        VALUES (rTitle, description, ingredients, instructions, published, authorId);
+
+        SET recipeId = LAST_INSERT_ID();
+
+        WHILE tagStart <= CHAR_LENGTH(tags) DO
+            SET tagEnd = LOCATE(',', tags, tagStart);
+            IF tagEnd = 0 THEN
+                SET tagEnd = CHAR_LENGTH(tags) + 1;
+            END IF;
+
+            SET tagName = TRIM(SUBSTRING(tags, tagStart, tagEnd - tagStart));
+
+            SELECT id INTO tagId
+            FROM tags
+            WHERE name = tagName
+            LIMIT 1;
+
+            IF tagId IS NULL THEN
+                INSERT INTO tags (name) VALUES (tagName);
+                SET tagId = LAST_INSERT_ID();
+            END IF;
+
+            INSERT INTO recipe_tags (recipe_id, tag_id)
+            VALUES (recipeId, tagId)
+            ON DUPLICATE KEY UPDATE tag_id = tag_id;
+
+            SET tagStart = tagEnd + 1;
+        END WHILE;
+    END IF;
+END$$
+
 DELIMITER ;

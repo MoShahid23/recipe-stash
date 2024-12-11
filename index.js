@@ -2,7 +2,8 @@ const express = require ('express')
 const ejs = require('ejs')
 const mysql = require('mysql2')
 const session = require('express-session');
-require('dotenv').config();
+require('dotenv').config()
+const { startScheduler } = require('./utils/scheduler');
 
 const app = express()
 const port = 8080;
@@ -60,6 +61,8 @@ app.use('/create', createRoutes)
 
 const usersRoutes = require("./routes/users")
 app.use('/users', usersRoutes)
+
+startScheduler();
 
 //start the web app
 app.listen(port, () => console.log(`Node app listening on port ${port}!`))

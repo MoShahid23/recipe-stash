@@ -200,11 +200,15 @@ body {
     color: #C2CFB2;
 }
 .content .post .description{
-    font-size: larger;
+    font-size: large;
     border-top: 1px solid #C57B57;
 }
 .content .post .ingredients{
     font-size: large;
+    max-height: 60px;
+    text-overflow: ellipsis;
+    text-wrap: nowrap;
+    overflow: hidden;
 }
 .content .post .details .username{
     display: inline-block;
