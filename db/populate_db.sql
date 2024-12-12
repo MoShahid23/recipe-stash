@@ -2,10 +2,6 @@ USE rs_db;
 
 INSERT INTO users (username, email, password)
 VALUES
-    ('RecipeStash', )
-
-INSERT INTO users (username, email, password)
-VALUES
     ('RecipeStash', 'admin@recipestash.com', 'RSyrmywyferoy2'),
     ('alice', 'alice@example.com', 'hashed_password1'),
     ('bob', 'bob@example.com', 'hashed_password2'),

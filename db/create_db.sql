@@ -13,7 +13,6 @@ CREATE TABLE IF NOT EXISTS recipes (
     id INT AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(100) NOT NULL,
     description TEXT,
-    ingredients TEXT NOT NULL,
     instructions TEXT NOT NULL,
     published TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     author_id INT NOT NULL,
@@ -33,6 +32,20 @@ CREATE TABLE IF NOT EXISTS recipe_tags (
     FOREIGN KEY (tag_id) REFERENCES tags(id) ON DELETE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS ingredients (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS recipe_ingredients (
+    recipe_id INT NOT NULL,
+    ingredient_id INT NOT NULL,
+    quantity VARCHAR(50),
+    PRIMARY KEY (recipe_id, ingredient_id),
+    FOREIGN KEY (recipe_id) REFERENCES recipes(id) ON DELETE CASCADE,
+    FOREIGN KEY (ingredient_id) REFERENCES ingredients(id) ON DELETE CASCADE
+);
+
 CREATE TABLE IF NOT EXISTS saved_recipes (
     user_id INT NOT NULL,
     recipe_id INT NOT NULL,
@@ -42,23 +55,6 @@ CREATE TABLE IF NOT EXISTS saved_recipes (
 );
 
 DELIMITER $$
-
-CREATE PROCEDURE getRecipes(IN tags VARCHAR(255))
-BEGIN
-    SET @sql_query = 'SELECT r.id, r.title, r.published, r.description, r.ingredients, u.username
-                      FROM recipes AS r
-                      JOIN users AS u ON r.author_id = u.id';
-
-    IF tags IS NOT NULL AND tags != '' THEN
-        SET @sql_query = CONCAT(@sql_query, ' WHERE r.tags IN (', tags, ')');
-    END IF;
-
-    SET @sql_query = CONCAT(@sql_query, ' ORDER BY r.published DESC');
-
-    PREPARE stmt FROM @sql_query;
-    EXECUTE stmt;
-    DEALLOCATE PREPARE stmt;
-END$$
 
 CREATE PROCEDURE getRecipe(
     IN recipeId INT
@@ -80,63 +76,97 @@ BEGIN
 END$$
 
 DELIMITER $$
-
-CREATE PROCEDURE addSpoonacularRecipe(
-    IN rTitle VARCHAR(255),
-    IN description TEXT,
-    IN ingredients TEXT,
-    IN instructions TEXT,
-    IN published TIMESTAMP,
-    IN rUsername VARCHAR(255),
-    IN tags TEXT
+CREATE PROCEDURE addRecipe (
+    IN recipeTitle VARCHAR(100),
+    IN recipeDescription TEXT,
+    IN recipeInstructions TEXT,
+    IN authorId INT,
+    IN ingredientList JSON -- Pass a JSON array of {quantity, name}
 )
 BEGIN
-    DECLARE authorId INT;
-    DECLARE tagName VARCHAR(50);
-    DECLARE tagStart INT DEFAULT 1;
-    DECLARE tagEnd INT;
-    DECLARE tagId INT;
     DECLARE recipeId INT;
 
-    SELECT id INTO authorId
-    FROM users
-    WHERE username = rUsername;
+    -- Step 1: Insert the recipe and get the inserted recipe_id
+    INSERT INTO recipes (title, description, instructions, author_id)
+    VALUES (recipeTitle, recipeDescription, recipeInstructions, authorId);
 
-    IF NOT EXISTS (
-        SELECT 1
-        FROM recipes
-        WHERE title = rTitle AND author_id = authorId
-    ) THEN
-        INSERT INTO recipes (title, description, ingredients, instructions, published, author_id)
-        VALUES (rTitle, description, ingredients, instructions, published, authorId);
+    SET recipeId = LAST_INSERT_ID();
 
-        SET recipeId = LAST_INSERT_ID();
+    -- Step 2: Process each ingredient in the JSON array
+    DECLARE i INT DEFAULT 0;
+    DECLARE ingredientCount INT;
+    SET ingredientCount = JSON_LENGTH(ingredientList);
 
-        WHILE tagStart <= CHAR_LENGTH(tags) DO
-            SET tagEnd = LOCATE(',', tags, tagStart);
-            IF tagEnd = 0 THEN
-                SET tagEnd = CHAR_LENGTH(tags) + 1;
-            END IF;
+    WHILE i < ingredientCount DO
+        -- Extract ingredient details
+        DECLARE ingredientName VARCHAR(100);
+        DECLARE ingredientQuantity VARCHAR(50);
 
-            SET tagName = TRIM(SUBSTRING(tags, tagStart, tagEnd - tagStart));
+        SET ingredientName = JSON_UNQUOTE(JSON_EXTRACT(ingredientList, CONCAT('$[', i, '].name')));
+        SET ingredientQuantity = JSON_UNQUOTE(JSON_EXTRACT(ingredientList, CONCAT('$[', i, '].quantity')));
 
-            SELECT id INTO tagId
-            FROM tags
-            WHERE name = tagName
-            LIMIT 1;
+        -- Ensure the ingredient exists in the ingredients table
+        DECLARE ingredientId INT;
+        SELECT id INTO ingredientId FROM ingredients WHERE name = ingredientName;
 
-            IF tagId IS NULL THEN
-                INSERT INTO tags (name) VALUES (tagName);
-                SET tagId = LAST_INSERT_ID();
-            END IF;
+        IF ingredientId IS NULL THEN
+            INSERT INTO ingredients (name) VALUES (ingredientName);
+            SET ingredientId = LAST_INSERT_ID();
+        END IF;
 
-            INSERT INTO recipe_tags (recipe_id, tag_id)
-            VALUES (recipeId, tagId)
-            ON DUPLICATE KEY UPDATE tag_id = tag_id;
+        -- Insert into recipe_ingredients table
+        INSERT INTO recipe_ingredients (recipe_id, ingredient_id, quantity)
+        VALUES (recipeId, ingredientId, ingredientQuantity);
 
-            SET tagStart = tagEnd + 1;
-        END WHILE;
-    END IF;
+        SET i = i + 1;
+    END WHILE;
 END$$
+DELIMITER ;
+
+DELIMITER //
+
+CREATE PROCEDURE addRecipe(
+    IN recipeTitle VARCHAR(100),
+    IN recipeDescription TEXT,
+    IN recipeInstructions TEXT,
+    IN authorId INT,
+    IN ingredientsJson TEXT
+)
+BEGIN
+    DECLARE recipeId INT;
+    DECLARE ingredientName VARCHAR(100);
+    DECLARE ingredientQuantity VARCHAR(50);
+    DECLARE ingredientId INT;
+
+    -- Insert the recipe into the recipes table
+    INSERT INTO recipes (title, description, instructions, author_id)
+    VALUES (recipeTitle, recipeDescription, recipeInstructions, authorId);
+
+    -- Get the last inserted recipe ID
+    SET recipeId = LAST_INSERT_ID();
+
+    -- Iterate over the JSON array of ingredients
+    WHILE JSON_LENGTH(ingredientsJson) > 0 DO
+        -- Extract the first ingredient object
+        SET ingredientName = JSON_UNQUOTE(JSON_EXTRACT(ingredientsJson, '$[0].name'));
+        SET ingredientQuantity = JSON_UNQUOTE(JSON_EXTRACT(ingredientsJson, '$[0].quantity'));
+
+        -- Check if the ingredient already exists
+        SELECT id INTO ingredientId FROM ingredients WHERE name = ingredientName LIMIT 1;
+
+        -- If not found, insert the new ingredient
+        IF ingredientId IS NULL THEN
+            INSERT INTO ingredients (name) VALUES (ingredientName);
+            SET ingredientId = LAST_INSERT_ID();
+        END IF;
+
+        -- Insert into the recipe_ingredients table
+        INSERT INTO recipe_ingredients (recipe_id, ingredient_id, quantity)
+        VALUES (recipeId, ingredientId, ingredientQuantity);
+
+        -- Remove the processed ingredient from the JSON array
+        SET ingredientsJson = JSON_REMOVE(ingredientsJson, '$[0]');
+    END WHILE;
+END //
 
 DELIMITER ;

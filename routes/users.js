@@ -9,8 +9,8 @@ router.get('/:username/posts/:id/:title?', function(req, res) {
     renderData.loggedIn = req.session.userId ? true : false;
     renderData.username = req.session.userId;
 
-    let query = "CALL getRecipe(?,?);";
-    db.query(query, [username, id], function(err, result){
+    let query = "CALL getRecipe(?);";
+    db.query(query, [id], function(err, result){
         if (err) {
             console.error(err);
             renderData.error = "An error has occurred trying to retrieve this post, please try agin later."
