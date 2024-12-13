@@ -3,7 +3,7 @@ require('dotenv').config();
 
 const SPOONACULAR_API_KEY = process.env.SPOONACULAR_API_KEY;
 
-async function fetchRandomRecipes(number = 5) {
+async function apiRandomRecipes(number) {
     const SPOONACULAR_URL = `https://api.spoonacular.com/recipes/random/`;
     let recipesFetched = [];
     try {
@@ -15,8 +15,6 @@ async function fetchRandomRecipes(number = 5) {
         });
 
         const recipes = response.data.recipes;
-        console.log(response);
-        console.log(recipes);
 
         for (let recipe of recipes) {
             let tags = [
@@ -27,7 +25,8 @@ async function fetchRandomRecipes(number = 5) {
             ]
             tags = tags.join(",").toLowerCase();
 
-            let ingredients = recipe.extendedIngredients.map(ing => `${ing.amount} ${ing.unit}#q#${ing.originalName}`).join("#p#");
+            let ingredients = [];
+            recipe.extendedIngredients.map(ing => ingredients.push({"name":ing.name, "quantity":ing.amount+" "+ing.unit}));
 
             let instructions;
             if(recipe.instructions){
@@ -37,30 +36,17 @@ async function fetchRandomRecipes(number = 5) {
                 title: recipe.title,
                 description: `${(recipe.summary || 'No description available.').replaceAll("<b>", "").replaceAll("</b>", "").split(".")[0]}.`,
                 ingredients: ingredients,
-                instructions: (instructions || 'No instructions provided.')+ "\n<a href='${recipe.spoonacularSourceUrl}'>This recipe is written by ${recipe.sourceName} and provided by Spoonacular</a>",
+                instructions: (instructions || 'No instructions provided.')+ `\n<a href='${recipe.spoonacularSourceUrl}'>This recipe is written by ${recipe.sourceName} and provided by Spoonacular</a>`,
                 published: (recipe.datePublished || new Date()).toISOString().slice(0, 19).replace('T', ' '),
                 username: 'RecipeStash',
                 tags: tags
             })
         }
-        console.log(recipesFetched);
+        return recipesFetched;
     } catch (error) {
         console.error('Error fetching or storing recipes:', error);
         console.log(error.message);
     }
 }
 
-//schedule task for midnight, daily
-function startScheduler() {
-    //fetchRandomRecipes(1);
-    console.log('Daily recipe fetch scheduled.');
-}
-
-
-
-
-
-
-module.exports = {
-    startScheduler,
-};
+module.exports = { apiRandomRecipes };

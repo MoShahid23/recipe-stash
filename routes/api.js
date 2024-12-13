@@ -174,7 +174,7 @@ async function getRandomRecipes(number = 10){
     `;
 
     const [results] = await db.query(query, [number]);
-    return results[0];
+    return results;
 }
 
 module.exports = {getPost, getPosts, getRandomRecipes, router};

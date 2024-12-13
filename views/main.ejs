@@ -18,7 +18,7 @@
         <div class="content">
             <div class="content-side left">
                 <h1>Random Recipes</h1>
-                <%for(let post of recipes){%>
+                <%for(let post of randomRecipes){%>
                     <div class="post-div">
                         <a href="/users/<%=post.username%>/posts/<%=post.id%>/<%=post.title%>" class="post">
                             <div class="title">
@@ -34,7 +34,8 @@
                                 </h3>
                             </div>
                             <div class="ingredients">
-                                <%=post%>
+                                <%let ingredientsString = post.ingredients.map(ing => ing.name).join(", ");%>
+                                <%=ingredientsString%>
                             </div>
                             <div class="details">
                                 <div class="timestamp"><%=new Date(post.published).toLocaleString()%></div>
