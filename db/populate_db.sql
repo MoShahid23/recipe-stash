@@ -8,28 +8,88 @@ VALUES
     ('charlie', 'charlie@example.com', 'hashed_password3');
 
 -- Insert sample data into `recipes`
-INSERT INTO recipes (title, description, ingredients, instructions, author_id)
+-- Insert ingredients
+INSERT INTO ingredients (name) VALUES
+    ('spaghetti'),
+    ('ground beef'),
+    ('tomato sauce'),
+    ('garlic'),
+    ('onion'),
+    ('olive oil'),
+    ('chicken'),
+    ('curry powder'),
+    ('coconut milk'),
+    ('grated ginger'),
+    ('broccoli'),
+    ('red bell pepper'),
+    ('soy sauce'),
+    ('sesame oil'),
+    ('flour'),
+    ('eggs'),
+    ('milk'),
+    ('sugar'),
+    ('butter');
+
+-- Insert recipes
+INSERT INTO recipes (title, description, instructions, author_id)
 VALUES
-    ('Spaghetti Bolognese',
+    ('Spaghetti Bolognese', 
      'A classic Italian pasta dish with a rich, savory sauce.',
-     '200 g#q#spaghetti#p#500 g#q#ground beef#p#400 g#q#tomato sauce#p#2 cloves#q#garlic#p#1#q#onion#p#2 tbsp#q#olive oil',
-     '1. Cook spaghetti. 2. Prepare sauce with beef, garlic, and tomato. 3. Combine and serve.', 
+     '1. Cook spaghetti. 2. Prepare sauce with beef, garlic, and tomato. 3. Combine and serve.',
      1),
 
-    ('Chicken Curry',
+    ('Chicken Curry', 
      'A flavorful and spicy chicken curry dish.',
-     '500 g#q#chicken#p#2 tbsp#q#curry powder#p#400 ml#q#coconut milk#p#2 cloves#q#garlic#p#1#q#onion#p#1 tbsp#q#grated ginger',
      '1. Cook chicken until browned. 2. Add spices and coconut milk. 3. Simmer and serve.', 
      2),
 
-    ('Vegetable Stir Fry',
+    ('Vegetable Stir Fry', 
      'A quick and easy vegetable stir-fry with Asian flavors.',
-     '150 g#q#broccoli#p#1#q#red bell pepper#p#3 tbsp#q#soy sauce#p#2 cloves#q#garlic#p#1 tbsp#q#grated ginger#p#1 tbsp#q#sesame oil',
      '1. Stir-fry vegetables in sesame oil. 2. Add soy sauce and garlic. 3. Serve hot.', 
      3),
 
-    ('Pancakes',
+    ('Pancakes', 
      'Fluffy pancakes perfect for breakfast.',
-     '200 g#q#flour#p#2#q#eggs#p#300 ml#q#milk#p#50 g#q#sugar#p#50 g#q#butter',
      '1. Mix ingredients. 2. Pour batter onto a hot pan. 3. Flip when bubbly. Serve with syrup.', 
      1);
+
+-- Insert recipe_ingredients associations (Note: ingredient_id should match the inserted IDs of the ingredients above)
+-- For Spaghetti Bolognese (recipe_id = 1)
+INSERT INTO recipe_ingredients (recipe_id, ingredient_id, quantity)
+VALUES
+    (1, (SELECT id FROM ingredients WHERE name = 'spaghetti'), '200 g'),
+    (1, (SELECT id FROM ingredients WHERE name = 'ground beef'), '500 g'),
+    (1, (SELECT id FROM ingredients WHERE name = 'tomato sauce'), '400 g'),
+    (1, (SELECT id FROM ingredients WHERE name = 'garlic'), '2 cloves'),
+    (1, (SELECT id FROM ingredients WHERE name = 'onion'), '1'),
+    (1, (SELECT id FROM ingredients WHERE name = 'olive oil'), '2 tbsp');
+
+-- For Chicken Curry (recipe_id = 2)
+INSERT INTO recipe_ingredients (recipe_id, ingredient_id, quantity)
+VALUES
+    (2, (SELECT id FROM ingredients WHERE name = 'chicken'), '500 g'),
+    (2, (SELECT id FROM ingredients WHERE name = 'curry powder'), '2 tbsp'),
+    (2, (SELECT id FROM ingredients WHERE name = 'coconut milk'), '400 ml'),
+    (2, (SELECT id FROM ingredients WHERE name = 'garlic'), '2 cloves'),
+    (2, (SELECT id FROM ingredients WHERE name = 'onion'), '1'),
+    (2, (SELECT id FROM ingredients WHERE name = 'grated ginger'), '1 tbsp');
+
+-- For Vegetable Stir Fry (recipe_id = 3)
+INSERT INTO recipe_ingredients (recipe_id, ingredient_id, quantity)
+VALUES
+    (3, (SELECT id FROM ingredients WHERE name = 'broccoli'), '150 g'),
+    (3, (SELECT id FROM ingredients WHERE name = 'red bell pepper'), '1'),
+    (3, (SELECT id FROM ingredients WHERE name = 'soy sauce'), '3 tbsp'),
+    (3, (SELECT id FROM ingredients WHERE name = 'garlic'), '2 cloves'),
+    (3, (SELECT id FROM ingredients WHERE name = 'grated ginger'), '1 tbsp'),
+    (3, (SELECT id FROM ingredients WHERE name = 'sesame oil'), '1 tbsp');
+
+-- For Pancakes (recipe_id = 4)
+INSERT INTO recipe_ingredients (recipe_id, ingredient_id, quantity)
+VALUES
+    (4, (SELECT id FROM ingredients WHERE name = 'flour'), '200 g'),
+    (4, (SELECT id FROM ingredients WHERE name = 'eggs'), '2'),
+    (4, (SELECT id FROM ingredients WHERE name = 'milk'), '300 ml'),
+    (4, (SELECT id FROM ingredients WHERE name = 'sugar'), '50 g'),
+    (4, (SELECT id FROM ingredients WHERE name = 'butter'), '50 g');
+

@@ -39,8 +39,8 @@ global.db = db
 app.locals.data = {siteName: "Recipe Stash"}
 
 //load the route handlers
-const apiRoutes = require("./routes/api")
-app.use('/api', apiRoutes)
+const  { router } = require("./routes/api")
+app.use('/api', router)
 
 const mainRoutes = require("./routes/main")
 app.use('/', mainRoutes)

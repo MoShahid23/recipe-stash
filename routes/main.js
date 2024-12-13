@@ -1,26 +1,18 @@
 //create a new router
 const express = require("express")
 const router = express.Router()
+const axios = require("axios")
 const {isAuthenticated} = require('../middlewares');
+const { getRandomRecipes } = require("./api");
 
-router.get('/', function(req, res) {
+router.get('/', async function(req, res) {
     let loggedIn = req.session.userId ? true : false;
-    let query = "CALL getRecipes('');";
-    let tags = req.session.tags || '';
-    db.query(query, tags, function(err, data) {
-        if (err) {
-            console.log(err);
-            return res.render("main.ejs", {
-                notif: 'There was an error retrieving recipes, please try again later.',
-                loggedIn,
-                recipes: [], // Return an empty array or any default value
-                username: req.session.userId
-            });
-        }
 
-        // When the query is successful, set recipes to the retrieved data
-        let recipes = data[0];
-
+    try {
+        // Fetch random recipes from the API
+        const response = await getRandomRecipes(10);
+        const recipes = response; // Assuming the API returns the recipes in the response data
+        console.log(response)
         switch(req.query.notif) {
             case "registered":
                 res.render("main.ejs", {
@@ -41,7 +33,15 @@ router.get('/', function(req, res) {
             default:
                 res.render("main.ejs", { recipes, loggedIn, username: req.session.userId });
         }
-    });
+    } catch (err) {
+        console.log(err);
+        res.render("main.ejs", {
+            notif: 'There was an error retrieving recipes, please try again later.',
+            loggedIn,
+            recipes: [], // Return an empty array or any default value
+            username: req.session.userId
+        });
+    }
 });
 
 

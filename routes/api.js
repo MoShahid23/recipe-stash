@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 
-router.get("/post/:id", function (req, res) {
+router.get("/post/:id", async function (req, res) {
     const postId = parseInt(req.params.id, 10);
 
     // Validate postId: must be a positive integer
@@ -12,16 +12,8 @@ router.get("/post/:id", function (req, res) {
         });
     }
 
-    const query = "CALL getRecipe(?)";
-
-    db.query(query, [postId], (err, data) => {
-        if (err) {
-            console.error(err);
-            return res.status(500).json({
-                success: false,
-                error: "Internal server error. Please try again later."
-            });
-        }
+    try {
+        const result = await getPost(postId);
 
         // Check if the post exists
         if (data[0].length === 0) {
@@ -36,11 +28,25 @@ router.get("/post/:id", function (req, res) {
             success: true,
             data: data[0]
         });
-    });
+
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({
+            success: false,
+            error: "Internal server error. Please try again later."
+        });
+    }
 });
 
-router.get("/posts", function (req, res) {
+async function getPost(postId){
+    const query = "CALL getRecipe(?)";
+    const [results] = await db.query(query, [postId]);
+    return results[0];
+}
+
+router.get("/posts", async function (req, res) {
     console.log("running");
+
     const title = req.query.title || "";
     const username = req.query.username || null;
     const tags = req.query.tags ? req.query.tags.split(",").map(tag => tag.trim()) : null;
@@ -55,6 +61,29 @@ router.get("/posts", function (req, res) {
         });
     }
 
+    try {
+        const results = await getPosts(title, username, tags, publishedRange, number, offset);
+
+        res.status(200).json({
+            success: true,
+            data: results,
+            pagination: {
+                offset: offset,
+                limit: number,
+                total: results.length
+            }
+        });
+
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({
+            success: false,
+            error: "Internal server error."
+        });
+    }
+});
+
+async function getPosts(title, username, tags, publishedRange, number, offset){
     let queryParameters = [`%${title}%`, `%${title}%`];
     let tagFilterQuery = "";
 
@@ -72,12 +101,17 @@ router.get("/posts", function (req, res) {
     }
 
     let query = `
-        SELECT r.id, r.title, r.published, r.description, r.ingredients, u.username,
-               GROUP_CONCAT(DISTINCT t.name) AS tags
+        SELECT r.id, r.title, r.published, r.description, u.username,
+               GROUP_CONCAT(DISTINCT t.name) AS tags,
+               JSON_ARRAYAGG(
+                  JSON_OBJECT('name', i.name, 'quantity', ri.quantity)
+               ) AS ingredients
         FROM recipes AS r
         JOIN users AS u ON r.author_id = u.id
         LEFT JOIN recipe_tags AS rt ON r.id = rt.recipe_id
         LEFT JOIN tags AS t ON rt.tag_id = t.id
+        LEFT JOIN recipe_ingredients ri ON r.id = ri.recipe_id
+        LEFT JOIN ingredients i ON ri.ingredient_id = i.id
         WHERE (r.title LIKE ? OR r.description LIKE ?)
     `;
 
@@ -96,72 +130,51 @@ router.get("/posts", function (req, res) {
     query += ` GROUP BY r.id LIMIT ? OFFSET ?`;
     queryParameters.push(number, offset);
 
-    db.query(query, queryParameters, function (error, results) {
-        if (error) {
-            console.error(error);
-            return res.status(500).json({ success: false, error: "Internal server error." });
-        }
+    console.log(query);
+    const [results] = await db.query(query, queryParameters);
+    return results[0];
+}
+
+router.get("/posts/random/:number?", async function (req, res) {
+    try {
+        const number = Math.min(parseInt(req.params.number) || 10, 50);
+        const results = await getRandomRecipes(number);
 
         res.status(200).json({
             success: true,
             data: results,
-            pagination: {
-                offset: offset,
-                limit: number,
-                total: results.length // Optional, add a COUNT query for the total
-            }
+            limit: number,
+            total: results.length
         });
-    });
-});
 
-router.post("/add/recipe", async function (req, res) {
-    const { title, description, instructions, authorId, ingredients } = req.body;
-
-    // Validate the inputs...
-    if (!title || !instructions || !authorId || !Array.isArray(ingredients)) {
-        return res.status(400).json({ success: false, error: "Validation failed: required fields are missing." });
-    }
-
-    const connection = await db.getConnection(); // Get a connection from the pool
-
-    try {
-        // Start a transaction
-        await connection.beginTransaction();
-
-        // Insert the recipe
-        const [recipeResult] = await connection.query(
-            "INSERT INTO recipes (title, description, instructions, author_id) VALUES (?, ?, ?, ?)",
-            [title, description, instructions, authorId]
-        );
-        const recipeId = recipeResult.insertId;
-
-        // Insert ingredients
-        for (const ingredient of ingredients) {
-            const [ingredientRow] = await connection.query(
-                "INSERT INTO ingredients (name) VALUES (?) ON DUPLICATE KEY UPDATE id=LAST_INSERT_ID(id)",
-                [ingredient.name]
-            );
-            const ingredientId = ingredientRow.insertId;
-
-            await connection.query(
-                "INSERT INTO recipe_ingredients (recipe_id, ingredient_id, quantity) VALUES (?, ?, ?)",
-                [recipeId, ingredientId, ingredient.quantity]
-            );
-        }
-
-        // Commit the transaction
-        await connection.commit();
-
-        res.status(201).json({ success: true, message: "Recipe added successfully.", recipeId });
-    } catch (err) {
-        // If anything fails, rollback the transaction
-        await connection.rollback();
-        console.error(err);
-        res.status(500).json({ success: false, error: "Internal server error." });
-    } finally {
-        connection.release(); // Release the connection back to the pool
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({
+            success: false,
+            error: "Internal server error."
+        });
     }
 });
 
+async function getRandomRecipes(number = 10){
+    const query = `
+        SELECT r.title, r.description, r.instructions, r.published, u.username,
+               GROUP_CONCAT(t.name) AS tags,
+               JSON_ARRAYAGG(
+                   JSON_OBJECT('name', i.name, 'quantity', ri.quantity)
+               ) AS ingredients
+        FROM recipes r
+        JOIN users u ON r.author_id = u.id
+        LEFT JOIN recipe_tags rt ON r.id = rt.recipe_id
+        LEFT JOIN tags t ON rt.tag_id = t.id
+        LEFT JOIN recipe_ingredients ri ON r.id = ri.recipe_id
+        LEFT JOIN ingredients i ON ri.ingredient_id = i.id
+        GROUP BY r.id
+        ORDER BY RAND() LIMIT ?;
+    `;
 
-module.exports = router;
+    const [results] = await db.query(query, [number]);
+    return results[0];
+}
+
+module.exports = {getPost, getPosts, getRandomRecipes, router};
