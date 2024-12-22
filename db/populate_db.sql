@@ -5,91 +5,52 @@ VALUES
     ('RecipeStash', 'admin@recipestash.com', 'RSyrmywyferoy2'),
     ('alice', 'alice@example.com', 'hashed_password1'),
     ('bob', 'bob@example.com', 'hashed_password2'),
-    ('charlie', 'charlie@example.com', 'hashed_password3');
-
--- Insert sample data into `recipes`
--- Insert ingredients
-INSERT INTO ingredients (name) VALUES
-    ('spaghetti'),
-    ('ground beef'),
-    ('tomato sauce'),
-    ('garlic'),
-    ('onion'),
-    ('olive oil'),
-    ('chicken'),
-    ('curry powder'),
-    ('coconut milk'),
-    ('grated ginger'),
-    ('broccoli'),
-    ('red bell pepper'),
-    ('soy sauce'),
-    ('sesame oil'),
-    ('flour'),
-    ('eggs'),
-    ('milk'),
-    ('sugar'),
-    ('butter');
-
--- Insert recipes
-INSERT INTO recipes (title, description, instructions, author_id)
-VALUES
-    ('Spaghetti Bolognese', 
-     'A classic Italian pasta dish with a rich, savory sauce.',
-     '1. Cook spaghetti. 2. Prepare sauce with beef, garlic, and tomato. 3. Combine and serve.',
-     1),
-
-    ('Chicken Curry', 
-     'A flavorful and spicy chicken curry dish.',
-     '1. Cook chicken until browned. 2. Add spices and coconut milk. 3. Simmer and serve.', 
-     2),
-
-    ('Vegetable Stir Fry', 
-     'A quick and easy vegetable stir-fry with Asian flavors.',
-     '1. Stir-fry vegetables in sesame oil. 2. Add soy sauce and garlic. 3. Serve hot.', 
-     3),
-
-    ('Pancakes', 
-     'Fluffy pancakes perfect for breakfast.',
-     '1. Mix ingredients. 2. Pour batter onto a hot pan. 3. Flip when bubbly. Serve with syrup.', 
-     1);
-
--- Insert recipe_ingredients associations (Note: ingredient_id should match the inserted IDs of the ingredients above)
--- For Spaghetti Bolognese (recipe_id = 1)
-INSERT INTO recipe_ingredients (recipe_id, ingredient_id, quantity)
-VALUES
-    (1, (SELECT id FROM ingredients WHERE name = 'spaghetti'), '200 g'),
-    (1, (SELECT id FROM ingredients WHERE name = 'ground beef'), '500 g'),
-    (1, (SELECT id FROM ingredients WHERE name = 'tomato sauce'), '400 g'),
-    (1, (SELECT id FROM ingredients WHERE name = 'garlic'), '2 cloves'),
-    (1, (SELECT id FROM ingredients WHERE name = 'onion'), '1'),
-    (1, (SELECT id FROM ingredients WHERE name = 'olive oil'), '2 tbsp');
-
--- For Chicken Curry (recipe_id = 2)
-INSERT INTO recipe_ingredients (recipe_id, ingredient_id, quantity)
-VALUES
-    (2, (SELECT id FROM ingredients WHERE name = 'chicken'), '500 g'),
-    (2, (SELECT id FROM ingredients WHERE name = 'curry powder'), '2 tbsp'),
-    (2, (SELECT id FROM ingredients WHERE name = 'coconut milk'), '400 ml'),
-    (2, (SELECT id FROM ingredients WHERE name = 'garlic'), '2 cloves'),
-    (2, (SELECT id FROM ingredients WHERE name = 'onion'), '1'),
-    (2, (SELECT id FROM ingredients WHERE name = 'grated ginger'), '1 tbsp');
-
--- For Vegetable Stir Fry (recipe_id = 3)
-INSERT INTO recipe_ingredients (recipe_id, ingredient_id, quantity)
-VALUES
-    (3, (SELECT id FROM ingredients WHERE name = 'broccoli'), '150 g'),
-    (3, (SELECT id FROM ingredients WHERE name = 'red bell pepper'), '1'),
-    (3, (SELECT id FROM ingredients WHERE name = 'soy sauce'), '3 tbsp'),
-    (3, (SELECT id FROM ingredients WHERE name = 'garlic'), '2 cloves'),
-    (3, (SELECT id FROM ingredients WHERE name = 'grated ginger'), '1 tbsp'),
-    (3, (SELECT id FROM ingredients WHERE name = 'sesame oil'), '1 tbsp');
-
--- For Pancakes (recipe_id = 4)
-INSERT INTO recipe_ingredients (recipe_id, ingredient_id, quantity)
-VALUES
-    (4, (SELECT id FROM ingredients WHERE name = 'flour'), '200 g'),
-    (4, (SELECT id FROM ingredients WHERE name = 'eggs'), '2'),
-    (4, (SELECT id FROM ingredients WHERE name = 'milk'), '300 ml'),
-    (4, (SELECT id FROM ingredients WHERE name = 'sugar'), '50 g'),
-    (4, (SELECT id FROM ingredients WHERE name = 'butter'), '50 g');
-
+    ('charlie', 'charlie@example.com', 'hashed_password3'),
+    ('david', 'david@example.com', 'hashed_password4'),
+    ('eve', 'eve@example.com', 'hashed_password5'),
+    ('frank', 'frank@example.com', 'hashed_password6'),
+    ('grace', 'grace@example.com', 'hashed_password7'),
+    ('hannah', 'hannah@example.com', 'hashed_password8'),
+    ('ian', 'ian@example.com', 'hashed_password9'),
+    ('julia', 'julia@example.com', 'hashed_password10'),
+    ('kyle', 'kyle@example.com', 'hashed_password11'),
+    ('laura', 'laura@example.com', 'hashed_password12'),
+    ('michael', 'michael@example.com', 'hashed_password13'),
+    ('nina', 'nina@example.com', 'hashed_password14'),
+    ('oliver', 'oliver@example.com', 'hashed_password15'),
+    ('paula', 'paula@example.com', 'hashed_password16'),
+    ('quentin', 'quentin@example.com', 'hashed_password17'),
+    ('rachel', 'rachel@example.com', 'hashed_password18'),
+    ('steve', 'steve@example.com', 'hashed_password19'),
+    ('tina', 'tina@example.com', 'hashed_password20'),
+    ('ursula', 'ursula@example.com', 'hashed_password21'),
+    ('victor', 'victor@example.com', 'hashed_password22'),
+    ('wendy', 'wendy@example.com', 'hashed_password23'),
+    ('xavier', 'xavier@example.com', 'hashed_password24'),
+    ('yvonne', 'yvonne@example.com', 'hashed_password25'),
+    ('zach', 'zach@example.com', 'hashed_password26'),
+    ('abby', 'abby@example.com', 'hashed_password27'),
+    ('brian', 'brian@example.com', 'hashed_password28'),
+    ('claire', 'claire@example.com', 'hashed_password29'),
+    ('diana', 'diana@example.com', 'hashed_password30'),
+    ('edward', 'edward@example.com', 'hashed_password31'),
+    ('fiona', 'fiona@example.com', 'hashed_password32'),
+    ('george', 'george@example.com', 'hashed_password33'),
+    ('helen', 'helen@example.com', 'hashed_password34'),
+    ('isaac', 'isaac@example.com', 'hashed_password35'),
+    ('jessica', 'jessica@example.com', 'hashed_password36'),
+    ('kevin', 'kevin@example.com', 'hashed_password37'),
+    ('linda', 'linda@example.com', 'hashed_password38'),
+    ('martin', 'martin@example.com', 'hashed_password39'),
+    ('nancy', 'nancy@example.com', 'hashed_password40'),
+    ('oscar', 'oscar@example.com', 'hashed_password41'),
+    ('pamela', 'pamela@example.com', 'hashed_password42'),
+    ('roger', 'roger@example.com', 'hashed_password43'),
+    ('susan', 'susan@example.com', 'hashed_password44'),
+    ('timothy', 'timothy@example.com', 'hashed_password45'),
+    ('ulysses', 'ulysses@example.com', 'hashed_password46'),
+    ('vanessa', 'vanessa@example.com', 'hashed_password47'),
+    ('william', 'william@example.com', 'hashed_password48'),
+    ('xena', 'xena@example.com', 'hashed_password49'),
+    ('yvette', 'yvette@example.com', 'hashed_password50'),
+    ('abdullah', 'yabdu@example.com', 'hashed_password51');

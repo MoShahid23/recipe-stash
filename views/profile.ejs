@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<html>
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title><%=user.username%> - <%=data.siteName%></title>
+        <link rel="stylesheet" href="/css/styles.css">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    </head>
+    <body>
+        <!--header from partials-->
+        <%- include('partials/header') %>
+        <!--header from partials-->
+
+        <div class="content">
+            <div class="content-side left">
+                
+                <%for(let post of randomRecipes){%>
+                    <div class="post-div">
+                        <a href="/users/<%=post.username%>/posts/<%=post.id%>/<%=post.title%>" class="post">
+                            <div class="title">
+                                <h2><%=post.title%></h2>
+                            </div>
+                            <div class="description">
+                                <h3>
+                                    <%if(post.username == "RecipeStash"){%>
+                                        <%=post.description%>
+                                    <%}else{%>
+                                        <%=post.description%>
+                                    <%}%>
+                                </h3>
+                            </div>
+                            <div class="ingredients">
+                                <%let ingredientsString = post.ingredients.map(ing => ing.name).join(", ");%>
+                                <%=ingredientsString%>
+                            </div>
+                            <div class="details">
+                                <div class="timestamp"><%=new Date(post.published).toLocaleString()%></div>
+                                <div class="username">by: <%=post.username%></div>
+                            </div>
+                            <div class="bottom">
+                                <%for(let tag of (post.tags||"").split(",").splice(0, 3)){%>
+                                    <span class="tag">
+                                        <%=tag%>
+                                    </span>
+                                <%}%>
+                            </div>
+                        </a>
+                    </div>
+                <%}%>
+            </div>
+        </div>
+    </body>
+    <script>
+        let offset = 0;
+        document.querySelector("#load-posts").addEventListener("click", async function(){
+            offset+=10;
+            console.log(await
+                fetch("/load-more/"+offset,
+                    {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            }
+                    }
+                ).then((result)=>{
+                    return result.body;
+                })
+            )
+        });
+    </script>
+</html>

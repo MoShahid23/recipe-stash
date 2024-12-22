@@ -17,13 +17,13 @@
 
         <div class="content">
             <div class="content-side left">
-                <h1>Writing a recipe</h1>
+                <h1>Publish a recipe</h1>
                 <% if (typeof formerror !== 'undefined' && formerror) { %>
                     <% for(let item of formerror){ %>
                         <h2 class="error"><%= item %></h2>
                 <% }} else{formerror = false} %>
 
-                <form class="fields" id="recipeForm" method="post" action="/register/submit">
+                <form class="fields" id="recipeForm" method="post" action="/create/post">
                     <span>Title* </span>
                     <input id="title" name="title" type="text" spellcheck="true" required placeholder="A simple title" <%if(formerror){%>value="<%=username%>"<%}%>>
                     <span id="usernameAvailability"></span>
@@ -207,13 +207,46 @@
         });
 
         // Validate inputs and create JSON on form submit
-        document.getElementById('recipeForm').addEventListener('submit', function(event) {
+        document.getElementById('recipeForm').addEventListener('submit', async function(event) {
             event.preventDefault(); // Prevent default form submission
+
+            let errors = document.querySelectorAll(".error");
+            for(let error of errors){
+                error.remove();
+            }
 
             const ingredientsJson = [];
             const ingredientAdds = document.querySelectorAll('.ingredient-add');
 
             let validForm = true; // Flag to check overall form validity
+
+            let tagValues = document.getElementById("tags").value.split(",");
+            let tags = [];
+            tagValues.forEach((tag, tagIndex) =>{
+                //remove any empty values
+                if(tag == ""){
+                    tagValues.splice(tagIndex, 1);
+                }
+                else{
+                    if(/^[a-zA-Z0-9\s]+$/.test(tag)){
+                        tag = tag.toLocaleLowerCase().trim();
+                        tags.push(tag);
+                    }
+                    else{
+                        document.getElementById("tags").previousElementSibling.insertAdjacentHTML("afterend", `<h2 id='tagError' class="error">Tag value '${tag}' is invalid. Please ensure tags are alphanumeric and separated by commas.</h2>`);
+                        document.getElementById("tags").classList.add("invalid")
+                        validForm = false;
+                        return;
+                    }
+                }
+            })
+            if(tags.length == 0){
+                document.getElementById("tags").classList.add("invalid")
+                validForm == false;
+            }
+            else{
+                document.getElementById("tags").classList.remove("invalid")
+            }
 
             ingredientAdds.forEach(add => {
                 const ingredientInput = add.querySelector('.ingredient');
@@ -222,23 +255,57 @@
                 // Validate both fields
                 const ingredientValid = validateInput(ingredientInput);
                 const quantityValid = validateInput(quantityInput);
+                console.log(ingredientValid)
+                console.log(quantityValid)
                 validForm = validForm && ingredientValid && quantityValid;
 
                 if (ingredientValid && quantityValid) {
                     ingredientsJson.push({
-                        ingredient: ingredientInput.value.trim(),
+                        name: ingredientInput.value.trim(),
                         quantity: quantityInput.value.trim()
                     });
                 }
             });
 
             if (!validForm) {
-                alert('Please correct the invalid fields.');
+                //alert('Please correct the invalid fields.');
+                document.getElementById('submit').insertAdjacentHTML("afterend", `<h2 class="error">Entered details contain errors. Please correct them and try again.</h2>`);
                 return;
             }
 
             console.log('Ingredients JSON:', JSON.stringify(ingredientsJson)); // Log JSON for verification
-            // Submit the form data here, e.g. using fetch or similar
+
+            const data = {
+                title: document.getElementById("title").value,
+                description: document.getElementById("description").value,
+                instructions: document.getElementById("instructions").value,
+                ingredients: ingredientsJson,
+                tags:tags,
+                csrfToken: "<%=csrfToken%>"
+            }
+
+            console.log(data)
+
+            try {
+                // Send a POST request to the server
+                const result = await fetch('/create/post', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if (result.ok) {
+                    location.href=`/users/<%=username%>/posts/${result.recipeId}/${data.title}`;
+                } else {
+                    alert('Error submitting recipe: ' + (result.message || 'Unknown error'));
+                    console.error('Error response from server:', result);
+                }
+            } catch (err) {
+                console.error('Error making POST request:', err);
+                alert('An error occurred while submitting the recipe. Please try again later.');
+            }
         });
     </script>
 </html>

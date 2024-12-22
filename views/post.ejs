@@ -3,7 +3,7 @@
     <head>
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title><%=post.title||"Error"%></title>
+        <title><%if(typeof post !== 'undefined'){%><%=post.title%><%}else{%>404 - RecipeStash<%}%></title>
         <link rel="stylesheet" href="/css/styles.css">
         <link rel="stylesheet" href="/css/single.css">
         <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -15,9 +15,7 @@
         <%- include('partials/header') %>
         <!--header from partials-->
         <div class="content">
-            <%if(typeof error !== 'undefined'){%>
-                <h1><%=error%></h1>
-            <%}else{%>
+            <%if(typeof post !== 'undefined'){%>
                 <div class="full-post">
                     <div class="post-div">
                         <div class="post">
@@ -27,6 +25,7 @@
                             </div>
                             <div class="title">
                                 <h2><%=post.title%></h2>
+                                <button class="<%=post.id%>" id="save"><%=(saved?"remove recipe":"save recipe")%></button>
                             </div>
                             <div class="description">
                                 <h3><%=post.description%></h3>
@@ -34,9 +33,9 @@
                             <div class="body">
                                 <div class="ingredients">
                                     <h4>Ingredients:</h4>
-                                    <%for(let ingredient of post.ingredients.split(",")){%>
+                                    <%for(let ing of post.ingredients){%>
                                         <div class="ingredient">
-                                            <%=ingredient%>
+                                            <%=ing.quantity+" "+ing.name%>
                                         </div>
                                     <%}%>
                                 </div>
@@ -45,10 +44,57 @@
                                     <%=post.instructions%>
                                 </div>
                             </div>
+                            <div class="bottom">
+                                <%for(let tag of (post.tags||"").split(",")){%>
+                                    <a href="/search?q=&tags=<%=tag%>" class="tag">
+                                        <%=tag%>
+                                    </a>
+                                <%}%>
+                            </div>
                         </div>
                     </div>
                 </div>
+            <%}else{%>
+                <%if(typeof error !== 'undefined'){%>
+                    <h1><%=error%></h1>
+                <%}else{%>
+                    <h1>There was an error fetching this post. Please try again later...</h1>
+                <%}%>
             <%}%>
         </div>
     </body>
+
+    <script>
+        let saveButton = document.querySelector("#save");
+
+        saveButton.addEventListener('click', function() {
+            console.log(saveButton.classList[0])
+            saveButton.disabled = true;
+
+            if(!<%=loggedIn%>){
+                saveButton.innerText = "please login first";
+                return;
+            }
+
+            fetch('/user/save/'+saveButton.classList[0]+"/?source=<%if(typeof post !== 'undefined'){if(post.username == 'RecipeStash'){%>spoonacular<%}}%>", {
+                method: 'GET',
+            })
+            .then(response => {
+                saveButton.disabled = false;
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+            })
+            .then(data => {
+                if(saveButton.innerText == "save recipe"){
+                    saveButton.innerText = "remove recipe";
+                }else{
+                    saveButton.innerText = "save recipe";
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+    </script>
 </html>

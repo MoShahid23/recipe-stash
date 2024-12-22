@@ -1,7 +1,7 @@
 <div class="header">
     <a href="/" class="logo"><span><%=data.siteName.replace(" ","")%></span></a>
     <form action="/search" method="get" class="options">
-        <input type="search" name="query" id="search" placeholder="Search recipe titles, descriptions, ingredients">
+        <input type="search" name="q" id="search" placeholder="Search recipes here.." value="<%=typeof(search)!=='undefined'?search.q:''%>">
     </form>
     <%if(typeof loggedIn !== 'undefined' && loggedIn){%>
         <div class="dropdown account">
@@ -9,6 +9,7 @@
             <div class="dropdown-content">
                 <a href="/create"><img src="/images/add_button.png" alt="add icon" width="16px" style="vertical-align: text-top;"> Write a recipe</a>
                 <a href="#"><img src="/images/profile_button.png" alt="profile icon" width="16px" style="vertical-align: text-top;"> Profile</a>
+                <a href="/user/logout"><img src="/images/logout_button.png" alt="Door icon" width="16px" style="vertical-align: text-top;"> Logout</a>
             </div>
         </div>
     <%}else{%>

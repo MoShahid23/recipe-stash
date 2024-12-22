@@ -3,24 +3,8 @@ const express = require("express")
 const router = express.Router()
 const axios = require("axios")
 const {isAuthenticated} = require('../middlewares');
-const { getRandomRecipes } = require("./api");
+const { getRandomRecipes, getPosts } = require("./api");
 const { apiRandomRecipes } = require('../utils/spoonacular');
-
-let apitest = `{
-    "title": "Madeleines With Irish Whiskey Fudge",
-    "description": "Madeleines With Irish Whiskey Fudge takes about 45 minutes from beginning to end.",
-    "ingredients": [
-        { "name": "barbecue sauce", "quantity": "12 oz" },
-        { "name": "chicken breasts", "quantity": "1 lbs" },
-        { "name": "hamburger buns", "quantity": "4 " }
-    ],
-    "instructions": "1. In the global or electric whisk, beat eggs with sugar until the mixture is white and fluffy.\n2. Soften the butter in the microwave for a few seconds.\n3. Add flour sifted with baking powder and stir with a whisk, add the butter, milk and instant coffee powder.\n4. Cover the bowl with the plastic wrap and let stand in refrigerator for at least half an hour, the thermal shock will inflate the madeleine.\n5. Preheat the oven to 220C.\n6. Pour a teaspoon of dough into each cell previously brushed with melted butter and tableware mold (my Silikomart) over a perforated tray.\n7. Bake at this temperature for 4 minutes, then lower it to 180C and cook for 5-6 minutes.\n8. Did those in the case too quickly, lower the oven temperature has increased by one minute cooking.\n<a href='https://spoonacular.com/madeleines-with-irish-whiskey-fudge-650602'>This recipe is written by Foodista and provided by Spoonacular</a>",
-    "published": "2024-12-13 05:11:39",
-    "username": "RecipeStash",
-    "tags": "european,irish,st patricks day"
-  }`;
-
-apitest = JSON.parse(apitest.replaceAll('\n', ""));
 
 router.get('/', async function(req, res) {
     let loggedIn = req.session.userId ? true : false;
@@ -28,15 +12,15 @@ router.get('/', async function(req, res) {
     try {
         let randomizer = Math.round(Math.random()*10);
         console.log("", randomizer);
-        const apiRecipes = [apitest]; //await apiRandomRecipes(1);
-        const dbRecipes = await getRandomRecipes(4);
+        const apiRecipes = []//await apiRandomRecipes(1);
+        const dbRecipes = await getRandomRecipes(5);
         let randomRecipes = [...dbRecipes, ...apiRecipes];
         randomRecipes = shuffleArray(randomRecipes);
 
         let renderData = {loggedIn, randomRecipes, username:req.session.userId};
 
         if(loggedIn){
-            
+            Object.assign(renderData, await getCateredRecipes(req));
         }
 
         switch(req.query.notif) {
@@ -46,8 +30,6 @@ router.get('/', async function(req, res) {
             case "loggedin":
                 renderData.notif = `Welcome back, ${req.session.userId}`;
                 break;
-            default:
-                res.render("main.ejs", { randomRecipes, loggedIn, username: req.session.userId });
         }
         res.render("main.ejs", renderData);
     } catch (err) {
@@ -60,6 +42,55 @@ router.get('/', async function(req, res) {
         });
     }
 });
+
+router.post('/load-more/:offset', isAuthenticated, async function(req, res) {
+    let offset = req.params.offset;
+    res.send(JSON.stringify(await getCateredRecipes(req, offset)));
+})
+
+async function getCateredRecipes(req, offset = 0){
+    try {
+        offset = Number(offset);
+        let cateredRecipes = [];
+
+        let savedQuery = `
+            SELECT DISTINCT t.name AS tag
+            FROM saved_recipes sr
+            JOIN users u ON u.id = sr.user_id
+            JOIN recipes r ON r.id = sr.recipe_id
+            JOIN recipe_tags rt ON r.id = rt.recipe_id
+            JOIN tags t ON rt.tag_id = t.id
+            WHERE u.username = ?;
+        `;
+        let spoonacularSavedQuery = `
+            SELECT DISTINCT t.name AS tag
+            FROM spoonacular_saved_recipes sr
+            JOIN users u ON u.id = sr.user_id
+            JOIN spoonacular_recipe_tags rt ON sr.recipe_id = rt.recipe_id
+            JOIN tags t ON rt.tag_id = t.id
+            WHERE u.username = ?;
+        `;
+
+        let [result1] = await db.query(savedQuery, [req.session.userId]);
+        let [result2] = await db.query(spoonacularSavedQuery, [req.session.userId]);
+
+        //combine the two outputs, removing duplicates
+        let result = [...new Set([...(result1 || []), ...(result2 || [])])];
+
+        if (result.length > 0) {
+            // Map result to extract tags
+            let tags = result.map(tagsObj => tagsObj.tag);
+            console.log(tags);
+
+            // Get posts based on tags
+            cateredRecipes = await getPosts({tags, offset});
+            return {cateredRecipes};
+        }
+    } catch (err) {
+        console.error("Error fetching catered recipes:", err);
+        return {error:"An error occurred while fetching catered recipes."};
+    }
+}
 
 function shuffleArray(array) {
     for (let i = array.length - 1; i > 0; i--) {

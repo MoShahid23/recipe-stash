@@ -43,111 +43,114 @@ router.get('/', function(req, res){
     }
 })
 
-router.post('/submit',[
-// Validation rules
-body('username').isLength(2).withMessage('Username must be at least 2 characters long').isAlphanumeric().withMessage('Username must be alphanumeric'),
-body('email').isEmail().withMessage('Please provide a valid email'),
-body('password').isStrongPassword({
-    minLength: 8,
-    minLowercase: 1,
-    minUppercase: 1,
-    minNumbers: 2,
-    minSymbols: 1,
-}).withMessage('Password must be at least 10 characters long and include a mix of upper and lowercase, 2 numbers, and 1 symbol')
-],(req, res) => {
-    const errors = validationResult(req);
-    const username = req.body.username
-    const email = req.body.email
+router.post(
+    "/submit",
+    [
+        // Validation rules
+        body("username")
+            .isLength(2)
+            .withMessage("Username must be at least 2 characters long")
+            .isAlphanumeric()
+            .withMessage("Username must be alphanumeric"),
+        body("email").isEmail().withMessage("Please provide a valid email"),
+        body("password")
+            .isStrongPassword({
+                minLength: 8,
+                minLowercase: 1,
+                minUppercase: 1,
+                minNumbers: 2,
+                minSymbols: 1,
+            })
+            .withMessage(
+                "Password must be at least 8 characters long and include a mix of upper and lowercase, 2 numbers, and 1 symbol"
+            ),
+    ],
+    async (req, res) => {
+        const errors = validationResult(req);
+        const { username, email, password } = req.body;
 
-    console.log("", username, email);
+        console.log("", username, email);
 
-    // If there are validation errors
-    if (!errors.isEmpty()) {
-        // Store error messages and form data in session
-        req.session.registerForm = {
-            username,
-            email,
-            errors: errors.array().map(err => err.msg) // Array of error messages
-        };
+        // If there are validation errors
+        if (!errors.isEmpty()) {
+            // Store error messages and form data in session
+            req.session.registerForm = {
+                username,
+                email,
+                errors: errors.array().map((err) => err.msg), // Array of error messages
+            };
 
-        // Redirect with formerror query
-        return res.redirect('/register?formerror=validation');
-    }
-
-    let checkQuery = `
-        SELECT
-            (username = ?) AS username_match,
-            (email = ?) AS email_match
-        FROM users
-        WHERE username = ? OR email = ?;
-    `;
-
-    db.query(checkQuery, [username, email, username, email], (err, results) => {
-        if (err) {
-            return console.error(err);
+            // Redirect with formerror query
+            return res.redirect("/register?formerror=validation");
         }
 
-        //data is valid
-        if (results.length === 0) {
+        try {
+            const checkQuery = `
+                SELECT
+                    (username = ?) AS username_match,
+                    (email = ?) AS email_match
+                FROM users
+                WHERE username = ? OR email = ?;
+            `;
 
-            bcrypt.hash(req.body.password, saltRounds, function(err, hashedPassword) {
-                if (err) {
-                    console.error(err);
-                    return res.send('There was an error processing your request.');
-                }
-                let query = `INSERT INTO users(username, email, password) VALUES(?, ?, ?);`;
-                db.query(query, [username, email, hashedPassword], (err, result) => {
-                    if (err) {
-                        console.error(err)
-                        res.send('There was an error processing your request.')
-                    }
-                    req.session.userId = req.body.username;
-                    res.redirect('/?notif=registered')
-                })
-            })
+            const [results] = await db.query(checkQuery, [username, email, username, email]);
 
-        //invalid data
-        } else {
+            // Data is valid
+            if (results.length === 0) {
+                const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+                const query = `INSERT INTO users(username, email, password) VALUES(?, ?, ?);`;
+                await db.query(query, [username, email, hashedPassword]);
+
+                req.session.userId = username;
+                return res.redirect("/?notif=registered");
+            }
+
+            // Invalid data
             req.session.registerForm = { username, email };
 
-            var usernameMatch = results.some(row => row.username_match);
-            var emailMatch = results.some(row => row.email_match);
+            const usernameMatch = results.some((row) => row.username_match);
+            const emailMatch = results.some((row) => row.email_match);
 
-            console.log(usernameMatch && emailMatch)
+            console.log(usernameMatch && emailMatch);
 
             if (usernameMatch && emailMatch) {
-                return res.redirect('/register?formerror=both');
+                return res.redirect("/register?formerror=both");
             } else if (usernameMatch) {
-                return res.redirect('/register?formerror=username');
+                return res.redirect("/register?formerror=username");
             } else if (emailMatch) {
-                return res.redirect('/register?formerror=email');
+                return res.redirect("/register?formerror=email");
             }
+        } catch (err) {
+            console.error(err);
+            res.send("There was an error processing your request.");
         }
-    });
-});
+    }
+);
 
-router.post('/taken', (req, res) => {
-    const username = req.body.username;
+// Route for checking if username is taken
+router.post("/taken", async (req, res) => {
+    const { username } = req.body;
     console.log(username);
 
-    let checkQuery = `
-        SELECT username
-        FROM users
-        WHERE username = ?
-    `;
+    try {
+        const checkQuery = `
+            SELECT username
+            FROM users
+            WHERE username = ?;
+        `;
 
-    db.query(checkQuery, [username], (err, results) => {
-        if (err) {
-            console.error(err);
-            return res.status(500).send({ error: 'Database query error' }); // Handle error properly
-        }
+        const [results] = await db.query(checkQuery, [username]);
 
         if (results.length > 0) {
             res.send({ taken: true });
         } else {
             res.send({ taken: false });
         }
-    });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send({ error: "Database query error" }); // Handle error properly
+    }
 });
 
 module.exports = router

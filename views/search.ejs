@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<html>
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Search <%=data.siteName%></title>
+        <link rel="stylesheet" href="/css/styles.css">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    </head>
+    <body>
+        <!--header from partials-->
+        <%- include('partials/header') %>
+        <!--header from partials-->
+
+        <div class="content">
+            <div class="content-side left search-options">
+                <h1>Filters</h1>
+                <form action="/search">
+                    <label for="q">Search:</label>
+                    <input placeholder="titles" type="search" name="q" value="<%=search.q||''%>">
+                    <label for="tags">Tags:</label>
+                    <input placeholder="vegetarian, dinner, etc" type="search" name="tags" value="<%=search.tags||''%>">
+                    Date Range:
+                    <div class="date-range">
+                        <label for="from">From:</label>
+                        <input name="from" type="date" value="<%=search.from||''%>">
+                        <label for="to">To:</label>
+                        <input name="to" type="date" value="<%=search.to||''%>">
+                    </div>
+                    <input type="submit" value="Search"></input>
+                    <input type="hidden" id="page-number" name="page">
+                </form>
+            </div>
+            <div class= "content-side right search-options">
+                <h1>Results</h1>
+                <div class="result-container">
+                    <span class="result">
+                        <% for (const [index, post] of (foundPosts || []).entries()) { %>
+                            <% if(index%2==0){ %>
+                                <%= insertPost(post) %>
+                            <% } %>
+                        <%}%>
+                    </span>
+                    <span class="result">
+                        <% for (const [index, post] of (foundPosts || []).entries()) { %>
+                            <% if(index%2==1){ %>
+                                <%= insertPost(post) %>
+                            <% } %>
+                        <%}%>
+                    </span>
+                </div>
+                <%function insertPost(post){%>
+                    <div class="post-div">
+                        <a href="/users/<%=post.username%>/posts/<%=post.id%>/<%=post.title%>" class="post">
+                            <div class="title">
+                                <h2><%=post.title%></h2>
+                            </div>
+                            <div class="description">
+                                <h3><%=post.description%></h3>
+                            </div>
+                            <div class="ingredients">
+                                <%let ingredientsString = post.ingredients.map(ing => ing.name).join(", ");%>
+                                <%=ingredientsString%>
+                            </div>
+                            <div class="details">
+                                <div class="timestamp"><%=new Date(post.published).toLocaleString()%></div>
+                                <div class="username">by: <%=post.username%></div>
+                            </div>
+                        </a>
+                    </div>
+                <%}%>
+                <div class="more-posts">
+                    <button id="previous-page" <%=search.page>1?"":"disabled"%>>
+                        Previous
+                    </button>
+                    <form action="">
+                        <input id="page-select" type="text" value="<%=search.page%>">
+                    </form>
+                    <button id="next-page" <%=(foundPosts||[]).length<10?"disabled":""%>>
+                        Next
+                    </button>
+                </div>
+            </div>
+        </div>
+    </body>
+
+    <script>
+        let pageInput = document.querySelector("#page-number")
+        document.querySelector("#previous-page").addEventListener("click", function(){
+            pageInput.value = "<%=Number(search.page)-1%>"
+            pageInput.parentElement.submit()
+        })
+        document.querySelector("#next-page").addEventListener("click", function(){
+            pageInput.value = "<%=Number(search.page)+1%>"
+            pageInput.parentElement.submit()
+        })
+        document.querySelector("#page-select").parentElement.addEventListener("submit", function(e){
+            e.preventDefault();
+            pageInput.value = document.querySelector("#page-select").value;
+            pageInput.parentElement.submit();
+        })
+    </script>
+</html>

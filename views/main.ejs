@@ -41,6 +41,13 @@
                                 <div class="timestamp"><%=new Date(post.published).toLocaleString()%></div>
                                 <div class="username">by: <%=post.username%></div>
                             </div>
+                            <div class="bottom">
+                                <%for(let tag of (post.tags||"").split(",").splice(0, 3)){%>
+                                    <span class="tag">
+                                        <%=tag%>
+                                    </span>
+                                <%}%>
+                            </div>
                         </a>
                     </div>
                 <%}%>
@@ -48,8 +55,7 @@
             <div class="content-side right">
                 <%if(loggedIn){%>
                     <h1>For you</h1>
-                    <%recipes.reverse()%>
-                    <%for(let post of recipes){%>
+                    <%for(let post of cateredRecipes){%>
                         <div class="post-div">
                             <a href="/users/<%=post.username%>/posts/<%=post.id%>/<%=post.title%>" class="post">
                                 <div class="title">
@@ -59,15 +65,28 @@
                                     <h3><%=post.description%></h3>
                                 </div>
                                 <div class="ingredients">
-                                    <%=post.ingredients%>
+                                    <%let ingredientsString = post.ingredients.map(ing => ing.name).join(", ");%>
+                                    <%=ingredientsString%>
                                 </div>
                                 <div class="details">
                                     <div class="timestamp"><%=new Date(post.published).toLocaleString()%></div>
                                     <div class="username">by: <%=post.username%></div>
                                 </div>
+                                <div class="bottom">
+                                    <%for(let tag of (post.tags||"").split(",").splice(0, 3)){%>
+                                        <span class="tag">
+                                            <%=tag%>
+                                        </span>
+                                    <%}%>
+                                </div>
                             </a>
                         </div>
                     <%}%>
+                    <div class="more-posts">
+                        <button id="load-posts" <%=(cateredRecipes||[]).length<10?"disabled":""%>>
+                            Load more
+                        </button>
+                    </div>
                 <%}else{%>
                     <div class="unregistered">
                         <span><a href="/register">Register now</a> to <br>customize your feed,<br>save recipes, and</span>
@@ -93,4 +112,79 @@
             </div>
         </div>
     </body>
+    <script>
+        let offset = 0;
+        document.querySelector("#load-posts").addEventListener("click", async function(){
+            offset+=10;
+            this.disabled = true;
+            this.innerText = "Loading posts...";
+            try {
+                const response = await fetch(`/load-more/${offset}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+
+                const data = await response.json(); // Parse the JSON response
+
+                if(data.cateredRecipes.length == 0){
+                    this.disabled = true;
+                    this.innerText = "All posts loaded!";
+                }
+
+                for(let post of data.cateredRecipes){
+
+                    let tags = "";
+                    for(let tag of (post.tags||"").split(",").splice(0, 3)){
+                        tags += `<span class="tag">
+                            ${tag}
+                         </span>`;
+                    }
+
+                    //insert the new posts, relative to the load button
+                    document.querySelector("#load-posts").parentElement.insertAdjacentHTML("beforebegin", `
+                        <div class="post-div ${data.cateredRecipes.indexOf(post)==0?'scroll':''}">
+                            <a href="/users/post.username/posts/post.id/post.title" class="post">
+                                <div class="title">
+                                    <h2>${post.title}</h2>
+                                </div>
+                                <div class="description">
+                                    <h3>${post.description}</h3>
+                                </div>
+                                <div class="ingredients">
+                                    ${post.ingredients.map(ing => ing.name).join(", ")}
+                                </div>
+                                <div class="details">
+                                    <div class="timestamp">${new Date(post.published).toLocaleString()}</div>
+                                    <div class="username">by: post.username</div>
+                                </div>
+                                <div class="bottom">
+                                    ${tags}
+                                </div>
+                            </a>
+                        </div>
+                    `)
+                    let scrollPoints = document.querySelectorAll(".scroll");
+                    if (scrollPoints.length > 0) {
+                        scrollPoints[scrollPoints.length - 1].scrollIntoView({
+                            behavior: "smooth",
+                            block: "start"
+                        });
+                    }
+                }
+            } catch (error) {
+                console.error("Error fetching data:", error);
+            }
+
+            if(this.innerText != "All posts loaded!"){
+                document.querySelector('#load-posts').disabled = false;
+                document.querySelector('#load-posts').innerText = "Load more";
+            }
+        });
+    </script>
 </html>

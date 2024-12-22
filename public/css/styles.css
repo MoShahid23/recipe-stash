@@ -106,6 +106,51 @@ body {
     margin-right: 10px;
 }
 
+.more-posts{
+    display: flex;
+}
+.more-posts button{
+    width: 170px;
+    padding: 10px;
+    color: #C2CFB2;
+    background-color: #302F4D;
+    border-radius: 10px;
+    border: 1px solid #302F4D;
+    cursor:pointer;
+
+    -webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+    -ms-border-radius: 10px;
+    -o-border-radius: 10px;
+}
+.more-posts button:disabled{
+    color: #143109;
+    background-color: #C2CFB2;
+    cursor: not-allowed;
+}
+.more-posts button:hover{
+    background-color: #143109;
+}
+.more-posts button:disabled:hover{
+    background-color: #C2CFB2;
+}
+.more-posts input{
+    max-width: 100px;
+    text-align: center;
+    margin: 0px 20px;
+    height: 100%;
+    border: 1px solid #302F4D;
+    background-color: #F7F7F7;
+
+
+    outline: none;
+    border-radius: 10px;
+    -webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+    -ms-border-radius: 10px;
+    -o-border-radius: 10px;
+}
+
 .content {
     display: flex;
     flex: 1;
@@ -127,6 +172,87 @@ body {
     width: 55%;
     align-items: center;
     border-left: solid 2px #302F4D;
+}
+.content .content-side.left.search-options{
+    width: 25%;
+}
+.content .content-side.left.search-options form{
+    display: flex;
+    flex-direction: column;
+    justify-content: start;
+    text-align: left;
+    width: 100%;
+    padding-right: 20px;
+}
+.content .content-side.left.search-options form .date-range{
+    display: flex;
+    flex-direction: column;
+    justify-content: start;
+    text-align: left;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: solid 2px #143109;
+    border-radius: 10px;
+    -webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+    -ms-border-radius: 10px;
+    -o-border-radius: 10px;
+}
+.content .content-side.left.search-options form input{
+    display: flex;
+    flex-direction: column;
+    justify-content: start;
+    text-align: left;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: solid 2px #143109;
+    border-radius: 10px;
+    -webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+    -ms-border-radius: 10px;
+    -o-border-radius: 10px;
+
+    background-color: #302F4D;
+    color: #C2CFB2;
+    font-size: 15px;
+    transition: 0.8s all;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    -ms-border-radius: 5px;
+    -o-border-radius: 5px;
+    -webkit-transition: 0.8s all;
+    -moz-transition: 0.8s all;
+    -ms-transition: 0.8s all;
+    -o-transition: 0.8s all;
+}
+.content .content-side.left.search-options form input:focus{
+    outline: none;
+    border: 2px solid #302F4D;
+    background-color: #C2CFB2;
+    color: #302F4D;
+}
+.content .content-side.left.search-options form input[type='submit']{
+    width: 50%;
+    align-self: end;
+    text-align: center;
+}
+.content .content-side.right.search-options{
+    width: 100%;
+}
+.content .content-side.right.search-options .result-container{
+    display: flex;
+    width: 100%;
+    justify-content: center;
+    padding-left: 20px;
+    justify-content: space-between;
+}
+.content .content-side.right.search-options .result-container .result{
+    display: inline-block;
+    width: 48%;
+}
+.content .content-side.right.search-options .result-container .result .post-div{
+    width: 100%;
+    max-width: 100%;
 }
 .content .unregistered{
     padding: 20px;
@@ -177,6 +303,20 @@ body {
     -ms-transition: all 0.8s;
     -o-transition: all 0.8s;
 }
+.post .bottom{
+    margin-top: 20px;
+    border-top: #C57B57 solid 1px ;
+    display: flex;
+}
+.post .bottom .tag{
+    color: #C2CFB2;
+    margin-right: 20px;
+    margin-top: 10px;
+}
+a.post .bottom{
+    margin-top: 0px;
+    border-top: none;
+}
 .content a.post:hover{
     background-color: #302F4D;
     transform: scaleX(1.02);
@@ -202,6 +342,15 @@ body {
 .content .post .description{
     font-size: large;
     border-top: 1px solid #C57B57;
+    max-height: 200px;
+    text-wrap: wrap;
+    overflow-y: hidden;
+    text-overflow: ellipsis;
+
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 5; /* Number of lines to show */
+    overflow: hidden;
 }
 .content .post .ingredients{
     font-size: large;
