@@ -11,7 +11,7 @@ router.get("/", async (req, res) => {
     renderData.loggedIn = req.session.userId ? true : false;
 
     if (renderData.loggedIn) {
-        return res.redirect("/");
+        return res.redirect(global.baseUrl+"/");
     }
 
     const loginForm = req.session.loginForm || {};
@@ -62,7 +62,7 @@ router.post(
         //if validation encounters error, redirect and display them.
         if (!errors.isEmpty()) {
             //redirect with query to signal error occurred
-            return res.redirect("/login?formerror=invalid");
+            return res.redirect(global.baseUrl+"/login?formerror=invalid");
         }
 
         try {
@@ -73,7 +73,7 @@ router.post(
 
             if (results.length === 0) {
                 //email does not exist in the database
-                return res.redirect("/login?formerror=invalid");
+                return res.redirect(global.baseUrl+"/login?formerror=invalid");
             }
 
             //retrieve hashed password
@@ -84,16 +84,16 @@ router.post(
 
             if (!isMatch) {
                 //passwords don't match
-                return res.redirect("/login?formerror=invalid");
+                return res.redirect(global.baseUrl+"/login?formerror=invalid");
             }
 
             //request validated, log user in
             req.session.userId = results[0].username;
             req.session.loginForm = null; //clear this data
-            res.redirect("/?notif=loggedin");
+            res.redirect(global.baseUrl+"/?notif=loggedin");
         } catch (err) {
             console.error(err);
-            return res.redirect("/login?formerror=error");
+            return res.redirect(global.baseUrl+"/login?formerror=error");
         }
     }
 );

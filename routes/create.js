@@ -55,7 +55,7 @@ router.post(
         try {
             //add the post and get its ID
             let recipeId = await addPost(title, description, instructions, req.session.userId, ingredients, tags);
-            res.redirect(`/users/${req.session.userId}/posts/${recipeId}/${title}`);
+            res.redirect(global.baseUrl+`/users/${req.session.userId}/posts/${recipeId}/${title}`);
         } catch (err) {
             console.error(err);
             res.status(500).json({ success: false, error: "Internal server error." });

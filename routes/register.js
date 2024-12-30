@@ -11,7 +11,7 @@ router.get('/', function(req, res){
 
     //redirect to main page if already authenticated
     if(renderData.loggedIn){
-        return res.redirect("/");
+        return res.redirect(global.baseUrl+"/");
     }
 
     var registerForm = req.session.registerForm || {};
@@ -82,7 +82,7 @@ router.post(
             };
 
             //redirect with formerror query
-            return res.redirect("/register?formerror=validation");
+            return res.redirect(global.baseUrl+"/register?formerror=validation");
         }
 
         try {
@@ -104,7 +104,7 @@ router.post(
                 await db.query(query, [username, email, hashedPassword]);
 
                 req.session.userId = username;
-                return res.redirect("/?notif=registered");
+                return res.redirect(global.baseUrl+"/?notif=registered");
             }
 
             //invalid data
@@ -116,11 +116,11 @@ router.post(
             console.log(usernameMatch && emailMatch);
 
             if (usernameMatch && emailMatch) {
-                return res.redirect("/register?formerror=both");
+                return res.redirect(global.baseUrl+"/register?formerror=both");
             } else if (usernameMatch) {
-                return res.redirect("/register?formerror=username");
+                return res.redirect(global.baseUrl+"/register?formerror=username");
             } else if (emailMatch) {
-                return res.redirect("/register?formerror=email");
+                return res.redirect(global.baseUrl+"/register?formerror=email");
             }
         } catch (err) {
             console.error(err);

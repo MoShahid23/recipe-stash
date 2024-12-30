@@ -6,14 +6,6 @@ const csv = require('csv-parser');
 //.env expected to be setup in parent folder
 require('dotenv').config({ path: '../.env' });
 
-//mySQL connection pool
-const db = mysql.createPool({
-    host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME
-});
-
 //random timestamps
 function getRandomTimestamp() {
     let start = new Date('2020-01-01T00:00:00Z').getTime();
@@ -24,14 +16,10 @@ function getRandomTimestamp() {
 
 //main workflow, executes automatically
 (async () => {
-    let args = process.argv.slice(2);
-    let seed = args[0] === 'seed';
-    let limit = parseInt(args[1], 10) || 1000; //default limit to 1000 if not specified
-
     //paths to files
-    let createDBScript = path.join(__dirname, 'create_db.sql');
-    let populateDBScript = path.join(__dirname, 'populate_db.sql');
-    let csvPath = path.join(__dirname, 'Food_Recipe.csv');
+    const createDBScript = path.join(__dirname, 'create_db.sql');
+    const populateDBScript = path.join(__dirname, 'populate_db.sql');
+    const csvPath = path.join(__dirname, 'Food_Recipe.csv');
 
     //execute SQL file
     let executeSQLFile = (filePath) => {
@@ -49,6 +37,21 @@ function getRandomTimestamp() {
             });
         });
     };
+
+    //execute create_db.sql
+    await executeSQLFile(createDBScript);
+
+    //mySQL connection pool
+    const db = mysql.createPool({
+        host: process.env.DB_HOST,
+        user: process.env.DB_USER,
+        password: process.env.DB_PASSWORD,
+        database: process.env.DB_NAME
+    });
+
+    let args = process.argv.slice(2);
+    let seed = args[0] === 'seed';
+    let limit = parseInt(args[1], 10) || 1000; //default limit to 1000 if not specified
 
     //process CSV
     let loadRecipes = async (csvPath, limit) => {
@@ -121,9 +124,6 @@ function getRandomTimestamp() {
     };
 
     try {
-        //execute create_db.sql
-        await executeSQLFile(createDBScript);
-
         //if seed is true, execute populate_db.sql
         if (seed) {
             await executeSQLFile(populateDBScript);

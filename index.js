@@ -5,7 +5,9 @@ const session = require('express-session');
 require('dotenv').config()
 
 const app = express()
-const port = 8080;
+const port = 8000;
+
+global.baseUrl = ""
 
 app.set('view engine', 'ejs')
 
