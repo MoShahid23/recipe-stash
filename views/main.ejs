@@ -1,190 +1,152 @@
 <!DOCTYPE html>
 <html lang="en">
-<html>
     <head>
+        <meta charset="UTF-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Welcome to <%=data.siteName%></title>
+        <title>Welcome to <%= data.siteName %></title>
         <link rel="stylesheet" href="/css/styles.css">
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100..900&display=swap" rel="stylesheet">
     </head>
     <body>
-        <!--header from partials-->
+        <!-- Header -->
         <%- include('partials/header') %>
-        <!--header from partials-->
 
         <div class="content">
             <div class="content-side left">
                 <h1>Random Recipes</h1>
-                <%for(let post of randomRecipes){%>
-                    <div class="post-div">
-                        <a href="/users/<%=post.username%>/posts/<%=post.id%>/<%=post.title%>" class="post">
-                            <div class="title">
-                                <h2><%=post.title%></h2>
-                            </div>
-                            <div class="description">
-                                <h3>
-                                    <%if(post.username == "RecipeStash"){%>
-                                        <%=post.description%>
-                                    <%}else{%>
-                                        <%=post.description%>
-                                    <%}%>
-                                </h3>
-                            </div>
-                            <div class="ingredients">
-                                <%let ingredientsString = post.ingredients.map(ing => ing.name).join(", ");%>
-                                <%=ingredientsString%>
-                            </div>
-                            <div class="details">
-                                <div class="timestamp"><%=new Date(post.published).toLocaleString()%></div>
-                                <div class="username">by: <%=post.username%></div>
-                            </div>
-                            <div class="bottom">
-                                <%for(let tag of (post.tags||"").split(",").splice(0, 3)){%>
-                                    <span class="tag">
-                                        <%=tag%>
-                                    </span>
-                                <%}%>
-                            </div>
-                        </a>
-                    </div>
-                <%}%>
+                <% for (let post of randomRecipes) { %>
+                    <%- include('partials/min-post.ejs', { post: post }) %>
+                <% } %>
             </div>
+
             <div class="content-side right">
-                <%if(loggedIn){%>
-                    <h1>For you</h1>
-                    <%for(let post of cateredRecipes){%>
-                        <div class="post-div">
-                            <a href="/users/<%=post.username%>/posts/<%=post.id%>/<%=post.title%>" class="post">
-                                <div class="title">
-                                    <h2><%=post.title%></h2>
-                                </div>
-                                <div class="description">
-                                    <h3><%=post.description%></h3>
-                                </div>
-                                <div class="ingredients">
-                                    <%let ingredientsString = post.ingredients.map(ing => ing.name).join(", ");%>
-                                    <%=ingredientsString%>
-                                </div>
-                                <div class="details">
-                                    <div class="timestamp"><%=new Date(post.published).toLocaleString()%></div>
-                                    <div class="username">by: <%=post.username%></div>
-                                </div>
-                                <div class="bottom">
-                                    <%for(let tag of (post.tags||"").split(",").splice(0, 3)){%>
-                                        <span class="tag">
-                                            <%=tag%>
-                                        </span>
-                                    <%}%>
-                                </div>
-                            </a>
-                        </div>
-                    <%}%>
+                <% if (loggedIn) { %>
+                    <h1>For You</h1>
+                    <% if (typeof notif !== "undefined" && notif) { %>
+                        <h3 style="color: #302F4D;"><%= notif %></h3>
+                    <% } %>
+
+                    <% if (cateredRecipes.length === 0) { %>
+                        <h2 class="general-text">Start saving posts to view a tailored feed.</h2>
+                    <% } %>
+
+                    <% for (let post of cateredRecipes) { %>
+                        <%- include('partials/min-post.ejs', { post: post }) %>
+                    <% } %>
+
                     <div class="more-posts">
-                        <button id="load-posts" <%=(cateredRecipes||[]).length<10?"disabled":""%>>
-                            Load more
-                        </button>
+                        <button id="load-posts" <%= (cateredRecipes || []).length < 10 ? "disabled" : "" %>>Load More</button>
                     </div>
-                <%}else{%>
+                <% } else { %>
                     <div class="unregistered">
-                        <span><a href="/register">Register now</a> to <br>customize your feed,<br>save recipes, and</span>
+                        <span><a href="/register">Register now</a> to customize your feed, save recipes, and more.</span>
                         <div class="post-div">
                             <a href="/register" class="post">
                                 <div class="title">
-                                    <h2>Share your own recipes</h2>
+                                    <h2>Share Your Own Recipes</h2>
                                 </div>
                                 <div class="description">
-                                    <h3>concocted of various</h3>
+                                    <h3>Concocted of various ingredients</h3>
                                 </div>
-                                <div class="ingredients">
-                                    delicious ingredients
-                                </div>
+                                <div class="ingredients">Delicious Ingredients</div>
                                 <div class="details">
                                     <div class="timestamp">Today</div>
-                                    <div class="username">by: you</div>
+                                    <div class="username">by: You</div>
                                 </div>
                             </a>
                         </div>
+                        <hr style="border: 1px solid #143109; margin-bottom: 20px;">
+                        <span><a href="/about" style="align-self: baseline; color: #302F4D;">About RecipeStash</a></span>
                     </div>
-                <%}%>
+                <% } %>
             </div>
         </div>
+
+        <script>
+            let offset = 0; //current offset for loading posts
+
+            //add event listener to the "load more" button
+            document.querySelector("#load-posts")?.addEventListener("click", async function() {
+                offset += 10; //increment offset by 10 for the next batch of posts
+                this.disabled = true; //disable the button to prevent multiple clicks
+                this.innerText = "Loading posts..."; //show loading state
+
+                try {
+                    //fetch additional posts from the server
+                    const response = await fetch(`/load-more/${offset}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    //check if the response is okay
+                    if (!response.ok) {
+                        const errorDetails = await response.text();
+                        throw new Error(`HTTP error! Status: ${response.status}. Details: ${errorDetails}`);
+                    }
+
+                    //ensure the response is JSON
+                    const contentType = response.headers.get('Content-Type');
+                    if (!contentType || !contentType.includes('application/json')) {
+                        console.log(contentType)
+                        throw new Error('Received non-JSON response from server.');
+                    }
+
+                    const data = await response.json(); //parse the JSON response
+
+                    //handle cases where no more posts are available
+                    if (!data.cateredRecipes || data.cateredRecipes.length === 0) {
+                        this.disabled = true;
+                        this.innerText = "All posts loaded!";
+                        return;
+                    }
+
+                    //process and display new posts
+                    data.cateredRecipes.forEach(post => {
+                        const tags = (post.tags || "").split(",").slice(0, 3).map(tag => `<span class="tag">${tag}</span>`).join("");
+
+                        document.querySelector("#load-posts").parentElement.insertAdjacentHTML("beforebegin", `
+                            <div class="post-div">
+                                <a href="/users/${post.username}/posts/${post.id}/${post.title}" class="post">
+                                    <div class="title">
+                                        <h2>${post.title}</h2>
+                                    </div>
+                                    <div class="description">
+                                        <h3>${post.description}</h3>
+                                    </div>
+                                    <div class="ingredients">${post.ingredients.map(ing => ing.name).join(", ")}</div>
+                                    <div class="details">
+                                        <div class="timestamp">${new Date(post.published).toLocaleString()}</div>
+                                        <div class="username">by: ${post.username}</div>
+                                    </div>
+                                    <div class="bottom">${tags}</div>
+                                </a>
+                            </div>
+                        `);
+                    });
+                } catch (error) {
+                    console.error("error fetching data:", error);
+                    //show user error message
+                    if(!document.querySelector("#errorMessage")){
+                        const errorMessage = document.createElement('div');
+                        errorMessage.id = "errorMessage"
+                        errorMessage.textContent = "An error occurred while loading posts. Please try again later.";
+                        errorMessage.style.color = "red";
+                        document.querySelector("#load-posts").insertAdjacentElement("afterend", errorMessage);
+                    }
+                } finally {
+                    //re-enable the button unless all posts are loaded
+                    if (this.innerText !== "All posts loaded!") {
+                        this.disabled = false;
+                        this.innerText = "Load More";
+                    }
+                }
+
+            });
+        </script>
     </body>
-    <script>
-        let offset = 0;
-        document.querySelector("#load-posts").addEventListener("click", async function(){
-            offset+=10;
-            this.disabled = true;
-            this.innerText = "Loading posts...";
-            try {
-                const response = await fetch(`/load-more/${offset}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                });
-
-                if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
-                }
-
-                const data = await response.json(); // Parse the JSON response
-
-                if(data.cateredRecipes.length == 0){
-                    this.disabled = true;
-                    this.innerText = "All posts loaded!";
-                }
-
-                for(let post of data.cateredRecipes){
-
-                    let tags = "";
-                    for(let tag of (post.tags||"").split(",").splice(0, 3)){
-                        tags += `<span class="tag">
-                            ${tag}
-                         </span>`;
-                    }
-
-                    //insert the new posts, relative to the load button
-                    document.querySelector("#load-posts").parentElement.insertAdjacentHTML("beforebegin", `
-                        <div class="post-div ${data.cateredRecipes.indexOf(post)==0?'scroll':''}">
-                            <a href="/users/post.username/posts/post.id/post.title" class="post">
-                                <div class="title">
-                                    <h2>${post.title}</h2>
-                                </div>
-                                <div class="description">
-                                    <h3>${post.description}</h3>
-                                </div>
-                                <div class="ingredients">
-                                    ${post.ingredients.map(ing => ing.name).join(", ")}
-                                </div>
-                                <div class="details">
-                                    <div class="timestamp">${new Date(post.published).toLocaleString()}</div>
-                                    <div class="username">by: post.username</div>
-                                </div>
-                                <div class="bottom">
-                                    ${tags}
-                                </div>
-                            </a>
-                        </div>
-                    `)
-                    let scrollPoints = document.querySelectorAll(".scroll");
-                    if (scrollPoints.length > 0) {
-                        scrollPoints[scrollPoints.length - 1].scrollIntoView({
-                            behavior: "smooth",
-                            block: "start"
-                        });
-                    }
-                }
-            } catch (error) {
-                console.error("Error fetching data:", error);
-            }
-
-            if(this.innerText != "All posts loaded!"){
-                document.querySelector('#load-posts').disabled = false;
-                document.querySelector('#load-posts').innerText = "Load more";
-            }
-        });
-    </script>
 </html>

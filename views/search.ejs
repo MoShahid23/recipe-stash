@@ -23,6 +23,10 @@
                     <input placeholder="titles" type="search" name="q" value="<%=search.q||''%>">
                     <label for="tags">Tags:</label>
                     <input placeholder="vegetarian, dinner, etc" type="search" name="tags" value="<%=search.tags||''%>">
+                    <label for="username">Username:</label>
+                    <input placeholder="username" type="search" name="username" value="<%=search.username||''%>">
+                    <label for="strict">Strict matching:</label>
+                    <input  type="checkbox" name="strict" value="true" <%=search.strict?"checked":""%>>
                     Date Range:
                     <div class="date-range">
                         <label for="from">From:</label>
@@ -36,42 +40,30 @@
             </div>
             <div class= "content-side right search-options">
                 <h1>Results</h1>
+                <%if(foundPosts.length == 0){%>
+                    <% if (typeof error !== 'undefined' && error) { %>
+                        <h3><%-error%></h3>
+                    <%}else{%>
+                        <h3>No posts found matching search criteria...</h3>
+                    <%}%>
+                <%}%>
                 <div class="result-container">
                     <span class="result">
                         <% for (const [index, post] of (foundPosts || []).entries()) { %>
                             <% if(index%2==0){ %>
-                                <%= insertPost(post) %>
+                                <%- include('partials/min-post.ejs', { post: post }) %>
                             <% } %>
                         <%}%>
                     </span>
                     <span class="result">
                         <% for (const [index, post] of (foundPosts || []).entries()) { %>
                             <% if(index%2==1){ %>
-                                <%= insertPost(post) %>
+                                <%- include('partials/min-post.ejs', { post: post }) %>
                             <% } %>
                         <%}%>
                     </span>
                 </div>
-                <%function insertPost(post){%>
-                    <div class="post-div">
-                        <a href="/users/<%=post.username%>/posts/<%=post.id%>/<%=post.title%>" class="post">
-                            <div class="title">
-                                <h2><%=post.title%></h2>
-                            </div>
-                            <div class="description">
-                                <h3><%=post.description%></h3>
-                            </div>
-                            <div class="ingredients">
-                                <%let ingredientsString = post.ingredients.map(ing => ing.name).join(", ");%>
-                                <%=ingredientsString%>
-                            </div>
-                            <div class="details">
-                                <div class="timestamp"><%=new Date(post.published).toLocaleString()%></div>
-                                <div class="username">by: <%=post.username%></div>
-                            </div>
-                        </a>
-                    </div>
-                <%}%>
+
                 <div class="more-posts">
                     <button id="previous-page" <%=search.page>1?"":"disabled"%>>
                         Previous

@@ -20,6 +20,13 @@ body {
     background-color: #C2CFB2;
 }
 
+a{
+    color: white;
+}
+a.recipe-credit:hover{
+    color: #C57B57;
+}
+
 .header {
     z-index: 999;
     display: grid;
@@ -108,6 +115,8 @@ body {
 
 .more-posts{
     display: flex;
+    width: 100%;
+    justify-content: center;
 }
 .more-posts button{
     width: 170px;
@@ -160,13 +169,19 @@ body {
     justify-content: start;
     flex-direction: row;
 }
+.content .general-text{
+    color: #302F4D;
+}
 .content .content-side{
     display: flex;
     flex-direction: column;
-    width: 45%;
+    width: 100%;
     align-items: start;
     max-height: calc(100vh - 120px);
     overflow-y: scroll;
+}
+.content .content-side.left{
+    width: 45%;
 }
 .content .content-side.right{
     width: 55%;
@@ -236,6 +251,9 @@ body {
     align-self: end;
     text-align: center;
 }
+.content .content-side.left.search-options form input[type='checkbox']{
+    align-self: end;
+}
 .content .content-side.right.search-options{
     width: 100%;
 }
@@ -281,6 +299,17 @@ body {
 .content .post-div{
     width: fit-content;
     max-width: 90%;
+}
+.content .profile-details{
+    width: 100%;
+    max-width: unset;
+}
+.content .left .profile-details{
+    width: calc(100% - 20px);
+    max-width: unset;
+}
+.content .profile-details div{
+    background-color: #302F4D;
 }
 .content .post{
     display: block;
@@ -349,7 +378,7 @@ a.post .bottom{
 
     display: -webkit-box;
     -webkit-box-orient: vertical;
-    -webkit-line-clamp: 5; /* Number of lines to show */
+    -webkit-line-clamp: 5;
     overflow: hidden;
 }
 .content .post .ingredients{

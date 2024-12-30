@@ -5,7 +5,7 @@ const { body, validationResult } = require("express-validator");
 const bcrypt = require("bcrypt");
 const saltRounds = 10;
 
-// Route for displaying login page
+//route for displaying login page
 router.get("/", async (req, res) => {
     let renderData = {};
     renderData.loggedIn = req.session.userId ? true : false;
@@ -36,7 +36,7 @@ router.get("/", async (req, res) => {
     }
 });
 
-// Route for handling login submission
+//route for handling login submission
 router.post(
     "/submit",
     [
@@ -54,42 +54,42 @@ router.post(
         const errors = validationResult(req);
         const { email, password } = req.body;
 
-        // Storing in session for redirect after errors
+        //storing in session for redirect after errors
         req.session.loginForm = {
             email,
         };
 
-        // If validation encounters error, redirect and display them.
+        //if validation encounters error, redirect and display them.
         if (!errors.isEmpty()) {
-            // Redirect with query to signal error occurred
+            //redirect with query to signal error occurred
             return res.redirect("/login?formerror=invalid");
         }
 
         try {
             const query = `SELECT username, password FROM users WHERE email = ?`;
 
-            // Execute query with await syntax
+            //execute query with await syntax
             const [results] = await db.query(query, [email]);
 
             if (results.length === 0) {
-                // Email does not exist in the database
+                //email does not exist in the database
                 return res.redirect("/login?formerror=invalid");
             }
 
-            // Retrieve hashed password
+            //retrieve hashed password
             const hashedPassword = results[0].password;
 
-            // Compare password using bcrypt
+            //compare password using bcrypt
             const isMatch = await bcrypt.compare(password, hashedPassword);
 
             if (!isMatch) {
-                // Passwords don't match
+                //passwords don't match
                 return res.redirect("/login?formerror=invalid");
             }
 
-            // Request validated, log user in
+            //request validated, log user in
             req.session.userId = results[0].username;
-            req.session.loginForm = null; // Clear this data
+            req.session.loginForm = null; //clear this data
             res.redirect("/?notif=loggedin");
         } catch (err) {
             console.error(err);

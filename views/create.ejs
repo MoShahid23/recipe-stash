@@ -84,16 +84,16 @@
     </body>
     <script>
         function updatePreview() {
-            // Grab input values
+            //grab input values
             const titleValue = document.getElementById("title").value;
             const descriptionValue = document.getElementById("description").value;
             const instructionsValue = document.getElementById("instructions").value;
             const tagValues = document.getElementById("tags").value || "";
 
-            // Replace line breaks with <br> tags for textarea content
+            //replace line breaks with <br> tags for textarea content
             const formatText = (text) => text.replace(/\n/g, "<br>");
 
-            // Update the corresponding preview elements
+            //update the corresponding preview elements
             document.querySelector(".post .title h2").textContent = titleValue || "A simple title";
             document.querySelector(".post .description h3").textContent = descriptionValue || "A brief description";
             document.querySelector(".post .instructions").innerHTML = "<h4>Instructions:</h4>"+formatText(instructionsValue) || "<h4>Instructions:</h4>Detailed instructions";
@@ -118,7 +118,7 @@
         document.getElementById("instructions").addEventListener("input", updatePreview);
         document.getElementById("tags").addEventListener("input", updatePreview);
 
-        // Function to update the ingredient JSON and display it
+        //function to update the ingredient JSON and display it
         function updateIngredients() {
             const ingredientsJson = [];
             const ingredientAdds = document.querySelectorAll('.ingredient-add');
@@ -127,7 +127,7 @@
                 const ingredientInput = add.querySelector('.ingredient');
                 const quantityInput = add.querySelector('.quantity');
 
-                // Only push valid entries
+                //only push valid entries
                 if (ingredientInput.value.trim() && quantityInput.value.trim()) {
                     ingredientsJson.push({
                         ingredient: ingredientInput.value.trim(),
@@ -136,9 +136,9 @@
                 }
             });
 
-            // Update the ingredients display
+            //update the ingredients display
             const ingredientsDisplay = document.querySelector('.ingredients');
-            ingredientsDisplay.innerHTML = '<h4>Ingredients:</h4>'; // Clear previous display
+            ingredientsDisplay.innerHTML = '<h4>Ingredients:</h4>'; //clear previous display
 
             ingredientsJson.forEach(item => {
                 const ingredientDiv = document.createElement('div');
@@ -148,9 +148,9 @@
             });
         }
 
-        // Function to validate input fields
+        //function to validate input fields
         function validateInput(input) {
-            const regex = /^[a-zA-Z0-9\s]+$/; // Allow alphanumeric and spaces
+            const regex = /^[a-zA-Z0-9\s]+$/; //allow alphanumeric and spaces
             if (!regex.test(input.value)) {
                 input.classList.add('invalid');
                 return false;
@@ -160,7 +160,7 @@
             }
         }
 
-        // Function to create a new ingredient add div
+        //function to create a new ingredient add div
         function createIngredientAdd() {
             const ingredientAddDiv = document.createElement('div');
             ingredientAddDiv.className = 'ingredient-add';
@@ -182,10 +182,10 @@
             removeButton.className = 'removeIngredient';
             removeButton.innerText = 'x';
 
-            // Remove ingredient add div on button click
+            //remove ingredient add div on button click
             removeButton.addEventListener('click', () => {
                 ingredientAddDiv.remove();
-                updateIngredients(); // Update the ingredient display after removal
+                updateIngredients(); //update the ingredient display after removal
             });
 
             ingredientInput.addEventListener('input', updateIngredients);
@@ -198,17 +198,17 @@
             document.getElementById('ingredientManager').appendChild(ingredientAddDiv);
         }
 
-        // Add new ingredient add div
+        //add new ingredient add div
         document.getElementById('addIngredient').addEventListener('click', createIngredientAdd);
 
-        // Initial input listeners for the first ingredient pair
+        //initial input listeners for the first ingredient pair
         document.querySelectorAll('.ingredient-add input').forEach(input => {
             input.addEventListener('input', updateIngredients);
         });
 
-        // Validate inputs and create JSON on form submit
+        //validate inputs and create JSON on form submit
         document.getElementById('recipeForm').addEventListener('submit', async function(event) {
-            event.preventDefault(); // Prevent default form submission
+            event.preventDefault(); //prevent default form submission
 
             let errors = document.querySelectorAll(".error");
             for(let error of errors){
@@ -218,7 +218,7 @@
             const ingredientsJson = [];
             const ingredientAdds = document.querySelectorAll('.ingredient-add');
 
-            let validForm = true; // Flag to check overall form validity
+            let validForm = true; //flag to check overall form validity
 
             let tagValues = document.getElementById("tags").value.split(",");
             let tags = [];
@@ -252,7 +252,7 @@
                 const ingredientInput = add.querySelector('.ingredient');
                 const quantityInput = add.querySelector('.quantity');
 
-                // Validate both fields
+                //validate both fields
                 const ingredientValid = validateInput(ingredientInput);
                 const quantityValid = validateInput(quantityInput);
                 console.log(ingredientValid)
@@ -273,7 +273,7 @@
                 return;
             }
 
-            console.log('Ingredients JSON:', JSON.stringify(ingredientsJson)); // Log JSON for verification
+            console.log('Ingredients JSON:', JSON.stringify(ingredientsJson)); //log JSON for verification
 
             const data = {
                 title: document.getElementById("title").value,
@@ -287,8 +287,8 @@
             console.log(data)
 
             try {
-                // Send a POST request to the server
-                const result = await fetch('/create/post', {
+                //send a POST request to the server
+                let result = await fetch('/create/post', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -297,10 +297,15 @@
                 });
 
                 if (result.ok) {
-                    location.href=`/users/<%=username%>/posts/${result.recipeId}/${data.title}`;
+                    if (result.redirected) {
+                        window.location.href = result.url;
+                    }
                 } else {
+                    result = await result.json();
+                    if(result.errors){
+                        result.message = result.errors.map(error => error.msg).join("<br>");
+                    }
                     alert('Error submitting recipe: ' + (result.message || 'Unknown error'));
-                    console.error('Error response from server:', result);
                 }
             } catch (err) {
                 console.error('Error making POST request:', err);

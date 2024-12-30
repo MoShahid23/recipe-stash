@@ -43,6 +43,15 @@
     color: #C57B57;
 }
 
+.content .full-post .post-div .post .username a{
+    color: #F7F7F7;
+    text-decoration: none;
+}
+.content .full-post .post-div .post .username a:hover{
+    color: #C2CFB2;
+    text-decoration: underline;
+}
+
 .content .form-only{
     width: 300px;
     margin: 0 auto;

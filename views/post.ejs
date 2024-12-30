@@ -11,9 +11,10 @@
         <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
     </head>
     <body>
-        <!--header from partials-->
+        <!-- Header section included from a shared partial file -->
         <%- include('partials/header') %>
-        <!--header from partials-->
+
+        <!-- Main content area -->
         <div class="content">
             <%if(typeof post !== 'undefined'){%>
                 <div class="full-post">
@@ -21,7 +22,7 @@
                         <div class="post">
                             <div class="details">
                                 <div class="timestamp"><%=new Date(post.published).toLocaleString()%></div>
-                                <div class="username">by: <%=post.username%></div>
+                                <div class="username"><a href="/users/<%=post.username%>">by: <%=post.username%></a></div>
                             </div>
                             <div class="title">
                                 <h2><%=post.title%></h2>
@@ -41,9 +42,10 @@
                                 </div>
                                 <div class="instructions">
                                     <h4>Instructions:</h4>
-                                    <%=post.instructions%>
+                                    <%-post.instructions.replaceAll("\n", "<br>")%>
                                 </div>
                             </div>
+                            <!-- Tags section for navigating to related posts -->
                             <div class="bottom">
                                 <%for(let tag of (post.tags||"").split(",")){%>
                                     <a href="/search?q=&tags=<%=tag%>" class="tag">
@@ -67,25 +69,29 @@
     <script>
         let saveButton = document.querySelector("#save");
 
+        //event listener for the save button
         saveButton.addEventListener('click', function() {
-            console.log(saveButton.classList[0])
-            saveButton.disabled = true;
+            console.log(saveButton.classList[0]); //log the post ID
+            saveButton.disabled = true; //disable the button during the process
 
+            //check if the user is logged in before making the request
             if(!<%=loggedIn%>){
-                saveButton.innerText = "please login first";
+                saveButton.innerText = "please login first"; //notify the user to log in
                 return;
             }
 
-            fetch('/user/save/'+saveButton.classList[0]+"/?source=<%if(typeof post !== 'undefined'){if(post.username == 'RecipeStash'){%>spoonacular<%}}%>", {
+            //send a GET request to save or remove the recipe
+            fetch('/user/save/' + saveButton.classList[0] + "/?source=<%if(typeof post !== 'undefined'){if(post.username == 'RecipeStash'){%>spoonacular<%}else{%>internal<%}}%>", {
                 method: 'GET',
             })
             .then(response => {
-                saveButton.disabled = false;
+                saveButton.disabled = false; //re-enable the button
                 if (!response.ok) {
-                    throw new Error('Network response was not ok');
+                    throw new Error('Network response was not ok'); //handle unsuccessful responses
                 }
             })
             .then(data => {
+                //toggle the button text between saving and removing the recipe
                 if(saveButton.innerText == "save recipe"){
                     saveButton.innerText = "remove recipe";
                 }else{
@@ -93,7 +99,7 @@
                 }
             })
             .catch(error => {
-                console.error('Error:', error);
+                console.error('Error:', error); //log any errors
             });
         });
     </script>

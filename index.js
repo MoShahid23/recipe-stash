@@ -41,6 +41,10 @@ app.locals.data = {siteName: "Recipe Stash"}
 const  { router } = require("./routes/api")
 app.use('/api', router)
 
+app.get("/about", (req, res) => {
+    res.render("profile.ejs", {profileUsername:"RecipeStash", myAccount:false, posts:[], loggedIn:req.session.userId?true:false, username:req.session.userId})
+})
+
 const mainRoutes = require("./routes/main")
 app.use('/', mainRoutes)
 

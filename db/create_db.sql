@@ -3,15 +3,15 @@ USE rs_db;
 
 CREATE TABLE IF NOT EXISTS users (
     id INT AUTO_INCREMENT,
-    username VARCHAR(50) UNIQUE NOT NULL,
-    email VARCHAR(100) UNIQUE NOT NULL,
+    username VARCHAR(100) UNIQUE NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
     password VARCHAR(255),
     PRIMARY KEY (id)
 );
 
 CREATE TABLE IF NOT EXISTS recipes (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    title TEXT NOT NULL,
+    title VARCHAR(500) NOT NULL,
     description TEXT,
     instructions TEXT NOT NULL,
     published TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS recipes (
 
 CREATE TABLE IF NOT EXISTS tags (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(50) UNIQUE NOT NULL
+    name VARCHAR(100) UNIQUE NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS recipe_tags (
@@ -40,7 +40,7 @@ CREATE TABLE IF NOT EXISTS ingredients (
 CREATE TABLE IF NOT EXISTS recipe_ingredients (
     recipe_id INT NOT NULL,
     ingredient_id INT NOT NULL,
-    quantity VARCHAR(500),
+    quantity VARCHAR(255),
     PRIMARY KEY (recipe_id, ingredient_id),
     FOREIGN KEY (recipe_id) REFERENCES recipes(id) ON DELETE CASCADE,
     FOREIGN KEY (ingredient_id) REFERENCES ingredients(id) ON DELETE CASCADE
@@ -68,6 +68,9 @@ CREATE TABLE IF NOT EXISTS spoonacular_recipe_tags (
     FOREIGN KEY (tag_id) REFERENCES tags(id) ON DELETE CASCADE
 );
 
+INSERT INTO users (username, email, password)
+VALUES ('RecipeStash', 'admin@recipestash.com', 'RSyrmywyferoy2');
+
 DELIMITER $$
 
 CREATE PROCEDURE getRecipe(
@@ -80,6 +83,7 @@ BEGIN
         r.description,
         r.instructions,
         r.published,
+        u.username,
         GROUP_CONCAT(DISTINCT t.name) AS tags,
         (
             SELECT
@@ -102,9 +106,10 @@ DELIMITER ;
 
 DELIMITER $$
 CREATE PROCEDURE deleteRecipe(
-    IN recipeId INT
+    IN recipeId INT,
+    IN authorId INT
 )
 BEGIN
-    DELETE FROM recipes WHERE id = recipeId;
+    DELETE FROM recipes WHERE id = recipeId AND author_id = authorId;
 END$$
 DELIMITER ;

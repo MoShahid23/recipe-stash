@@ -46,12 +46,13 @@ router.get('/', function(req, res){
 router.post(
     "/submit",
     [
-        // Validation rules
+        //validation rules
         body("username")
             .isLength(2)
             .withMessage("Username must be at least 2 characters long")
             .isAlphanumeric()
-            .withMessage("Username must be alphanumeric"),
+            .withMessage("Username must be alphanumeric")
+            .isLength({ max: 100 }).withMessage("Username must be less than 100 characters"),
         body("email").isEmail().withMessage("Please provide a valid email"),
         body("password")
             .isStrongPassword({
@@ -63,7 +64,7 @@ router.post(
             })
             .withMessage(
                 "Password must be at least 8 characters long and include a mix of upper and lowercase, 2 numbers, and 1 symbol"
-            ),
+            ).isLength({ max: 100 }).withMessage("Username must be less than 100 characters"),
     ],
     async (req, res) => {
         const errors = validationResult(req);
@@ -71,16 +72,16 @@ router.post(
 
         console.log("", username, email);
 
-        // If there are validation errors
+        //if there are validation errors
         if (!errors.isEmpty()) {
-            // Store error messages and form data in session
+            //store error messages and form data in session
             req.session.registerForm = {
                 username,
                 email,
-                errors: errors.array().map((err) => err.msg), // Array of error messages
+                errors: errors.array().map((err) => err.msg), //array of error messages
             };
 
-            // Redirect with formerror query
+            //redirect with formerror query
             return res.redirect("/register?formerror=validation");
         }
 
@@ -95,7 +96,7 @@ router.post(
 
             const [results] = await db.query(checkQuery, [username, email, username, email]);
 
-            // Data is valid
+            //data is valid
             if (results.length === 0) {
                 const hashedPassword = await bcrypt.hash(password, saltRounds);
 
@@ -106,7 +107,7 @@ router.post(
                 return res.redirect("/?notif=registered");
             }
 
-            // Invalid data
+            //invalid data
             req.session.registerForm = { username, email };
 
             const usernameMatch = results.some((row) => row.username_match);
@@ -128,7 +129,7 @@ router.post(
     }
 );
 
-// Route for checking if username is taken
+//route for checking if username is taken
 router.post("/taken", async (req, res) => {
     const { username } = req.body;
     console.log(username);
@@ -149,7 +150,7 @@ router.post("/taken", async (req, res) => {
         }
     } catch (err) {
         console.error(err);
-        res.status(500).send({ error: "Database query error" }); // Handle error properly
+        res.status(500).send({ error: "Database query error" }); //handle error properly
     }
 });
 

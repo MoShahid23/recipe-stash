@@ -22,15 +22,15 @@
                     <% for(let item of formerror){ %>
                         <h2 class="error"><%= item %></h2>
                 <% }} else{formerror = false} %>
-    
+
                 <form class="fields" method="post" action="/register/submit">
                     <span>Username: </span>
                     <input id="username" name="username" type="text" spellcheck="false" required <%if(formerror){%>value="<%=username%>"<%}%>>
                     <span id="usernameAvailability"></span>
-    
+
                     <span>Email Address: </span>
                     <input id="email" name="email" type="email" spellcheck="false" autocomplete="username" required <%if(formerror){%>value="<%=email%>"<%}%>>
-    
+
                     <span>Password: <button type="button" id="show-password">show</button></span>
                     <input id="password" name="password" type="password" autocomplete="current-password" required>
                     <button id="submit" type="submit">Register</button>
@@ -86,7 +86,7 @@
             }
         };
 
-        // Usage (e.g., on input change)
+        //usage (e.g., on input change)
         document.getElementById('username').addEventListener('input', (event) => {
             checkUsernameAvailability(event.target.value);
         });

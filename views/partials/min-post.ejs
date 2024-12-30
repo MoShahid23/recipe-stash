@@ -1,0 +1,37 @@
+<div class="post-div">
+    <a href="/users/<%=post.username%>/posts/<%=post.id%>/<%=post.title%>" class="post">
+        <div class="title">
+            <h2><%=post.title%></h2>
+            <%if(typeof(saved) !== "undefined" && saved){%>
+                <button class="<%=post.id%> save">remove recipe</button>
+            <%}%>
+            <%if(typeof(deletable) !== "undefined" && deletable){%>
+                <button class="<%=post.id%> delete">delete recipe</button>
+            <%}%>
+        </div>
+        <div class="description">
+            <h3>
+                <%if(post.username == "RecipeStash"){%>
+                    <%=post.description%>
+                <%}else{%>
+                    <%=post.description%>
+                <%}%>
+            </h3>
+        </div>
+        <div class="ingredients">
+            <%let ingredientsString = post.ingredients.map(ing => ing.name).join(", ");%>
+            <%=ingredientsString%>
+        </div>
+        <div class="details">
+            <div class="timestamp"><%=new Date(post.published).toLocaleString()%></div>
+            <div class="username">by: <%=post.username%></div>
+        </div>
+        <div class="bottom">
+            <%for(let tag of (post.tags||"").split(",").splice(0, 4)){%>
+                <span class="tag">
+                    <%=tag%>
+                </span>
+            <%}%>
+        </div>
+    </a>
+</div>
