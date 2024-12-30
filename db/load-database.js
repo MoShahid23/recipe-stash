@@ -25,7 +25,7 @@ function getRandomTimestamp() {
     let executeSQLFile = (filePath) => {
         //exec, asynchronous, requires promise wrapper
         return new Promise((resolve, reject) => {
-            let command = `mysql -h ${process.env.DB_HOST} -u root -p${process.env.DB_PASSWORD_ROOT} < "${filePath}"`;
+            let command = `mysql -h ${process.env.DB_HOST} -u root -p --password=${process.env.DB_PASSWORD_ROOT} < "${filePath}"`;
             exec(command, (err, stdout, stderr) => {
                 if (err) {
                     console.error(`Error executing ${filePath}:`, stderr);

@@ -19,6 +19,7 @@ router.get('/', function(req, res){
 
     renderData.username = registerForm.username;
     renderData.email = registerForm.email;
+    renderData.baseUrl = baseUrl;
 
     switch(req.query.formerror){
         case "both":

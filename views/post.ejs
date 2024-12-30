@@ -81,7 +81,7 @@
             }
 
             //send a GET request to save or remove the recipe
-            fetch('/user/save/' + saveButton.classList[0] + "/?source=<%if(typeof post !== 'undefined'){if(post.username == 'RecipeStash'){%>spoonacular<%}else{%>internal<%}}%>", {
+            fetch('<%=(baseUrl||"")%>/user/save/' + saveButton.classList[0] + "/?source=<%if(typeof post !== 'undefined'){if(post.username == 'RecipeStash'){%>spoonacular<%}else{%>internal<%}}%>", {
                 method: 'GET',
             })
             .then(response => {

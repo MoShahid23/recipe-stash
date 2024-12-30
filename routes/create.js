@@ -17,6 +17,7 @@ router.get('/', isAuthenticated, (req, res) => {
     const csrfToken = crypto.randomBytes(32).toString("hex");
     req.session.csrfToken = csrfToken;
     renderData.csrfToken = csrfToken;
+    renderData.baseUrl = global.baseUrl;
 
     res.render('create', renderData);
 });

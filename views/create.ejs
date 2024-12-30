@@ -288,7 +288,7 @@
 
             try {
                 //send a POST request to the server
-                let result = await fetch('/create/post', {
+                let result = await fetch('<%=(baseUrl||"")%>/create/post', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'

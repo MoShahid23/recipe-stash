@@ -20,6 +20,7 @@ router.get('/:username', [
     renderData.username = req.session.userId;
     renderData.myAccount = false;
     renderData.profileUsername = username;
+    renderData.baseUrl = global.baseUrl;
     //viewing own profile
     if(username == req.session.userId){
         renderData.myAccount = true;

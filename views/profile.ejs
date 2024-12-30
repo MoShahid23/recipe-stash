@@ -79,7 +79,7 @@
                             spoonacular = "?source=spoonacular"
                         }
 
-                        fetch('/user/save/'+button.classList[0]+spoonacular, {
+                        fetch('<%=(baseUrl||"")%>/user/save/'+button.classList[0]+spoonacular, {
                             method: 'GET',
                         })
                         .then(response => {
@@ -112,7 +112,7 @@
                         if(!confirm("Are you sure you would like to delete this post?"))return;
                         button.disabled = true;
 
-                        fetch(`/user/delete/${button.classList[0]}`, {
+                        fetch(`<%=(baseUrl||"")%>/user/delete/${button.classList[0]}`, {
                             method: 'GET',
                             headers: {
                                 'csrf': '<%= typeof(csrfToken)!=="undefined"?csrfToken:"na" %>',
