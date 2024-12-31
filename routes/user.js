@@ -79,7 +79,7 @@ router.get('/delete/:postId', [
     }
 
     const recipeId = req.params.postId; //recipe ID to delete
-    const csrfToken = req.headers.csrf; //cSRF token from the request header
+    const csrfToken = req.headers.csrf; //CSRF token from the request header
 
     try {
         //validate the CSRF token

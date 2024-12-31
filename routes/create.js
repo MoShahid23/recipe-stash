@@ -5,9 +5,7 @@ const { body, validationResult } = require("express-validator");
 const router = express.Router();
 const { isAuthenticated } = require("../middlewares");
 
-/**
- * GET / - Render the create post page with CSRF token.
- */
+//render the create post page
 router.get('/', isAuthenticated, (req, res) => {
     let renderData = {};
     renderData.loggedIn = req.session.userId ? true : false;
@@ -22,9 +20,7 @@ router.get('/', isAuthenticated, (req, res) => {
     res.render('create', renderData);
 });
 
-/**
- * POST /post - Handle the creation of a new post.
- */
+//handle the creation of a new post.
 router.post(
     "/post",
     isAuthenticated,
@@ -64,16 +60,7 @@ router.post(
     }
 );
 
-/**
- * Add a new post to the database with associated ingredients and tags.
- * @param {string} title - The title of the recipe.
- * @param {string} description - The description of the recipe.
- * @param {string} instructions - The instructions for the recipe.
- * @param {string} username - The username of the author.
- * @param {Array} ingredients - The list of ingredients with their quantities.
- * @param {Array} tags - The list of tags.
- * @returns {Promise<number>} - The ID of the newly created recipe.
- */
+//add a new post to the database with associated ingredients and tags
 async function addPost(title, description, instructions, username, ingredients, tags) {
     const connection = await db.getConnection(); //get a connection from the pool
 

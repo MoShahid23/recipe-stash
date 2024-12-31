@@ -255,8 +255,6 @@
                 //validate both fields
                 const ingredientValid = validateInput(ingredientInput);
                 const quantityValid = validateInput(quantityInput);
-                console.log(ingredientValid)
-                console.log(quantityValid)
                 validForm = validForm && ingredientValid && quantityValid;
 
                 if (ingredientValid && quantityValid) {
@@ -268,12 +266,9 @@
             });
 
             if (!validForm) {
-                //alert('Please correct the invalid fields.');
                 document.getElementById('submit').insertAdjacentHTML("afterend", `<h2 class="error">Entered details contain errors. Please correct them and try again.</h2>`);
                 return;
             }
-
-            console.log('Ingredients JSON:', JSON.stringify(ingredientsJson)); //log JSON for verification
 
             const data = {
                 title: document.getElementById("title").value,
@@ -283,8 +278,6 @@
                 tags:tags,
                 csrfToken: "<%=csrfToken%>"
             }
-
-            console.log(data)
 
             try {
                 //send a POST request to the server

@@ -39,7 +39,6 @@ router.get('/:username', [
             req.session.csrfToken = csrfToken;
             renderData.csrfToken = csrfToken;
             renderData.savedPosts = await getSavedPosts(req);
-            console.log(renderData.savedPosts)
         }
 
         //getPosts with the username of the profile to retrieve relevant posts
@@ -113,8 +112,6 @@ router.get('/:username/posts/:id/:title?', [
             let query = "CALL getRecipe(?);";
             [[result]] = await db.query(query, [id])
         }
-
-        console.log(result);
 
         if (result) {
             renderData.post = result[0];

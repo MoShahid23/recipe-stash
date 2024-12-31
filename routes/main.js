@@ -3,28 +3,26 @@ const express = require("express")
 const router = express.Router()
 //import middleware to check if user is authenticated
 const {isAuthenticated} = require('../middlewares');
-//import utility functions for retrieving recipes
 const { getRandomRecipes, getPosts } = require("./api");
-//import Spoonacular API integration for random recipes
 const { getRandomRecipes:getSpoonacularRandomRecipes } = require('../utils/spoonacular');
 
-//handle the main route
+//handle the home route
 router.get('/', async function(req, res) {
     //determine if the user is logged in based on session data
     let loggedIn = req.session.userId ? true : false;
 
     try {
-        //generate a random number (purpose unclear, possibly for debugging)
+        //generate a random number
         let randomizer = Math.round(Math.random()*7);
 
-        const apiRecipes = await getSpoonacularRandomRecipes(randomizer)
-        const dbRecipes = await getRandomRecipes(15-randomizer); //fetch 5 random recipes from the database
+        const apiRecipes = await getSpoonacularRandomRecipes(randomizer) //from api
+        const dbRecipes = await getRandomRecipes(15-randomizer); //from database
         let randomRecipes = [...dbRecipes, ...apiRecipes]; //combine results from both sources
 
         //shuffle the combined recipe list for variety
         randomRecipes = shuffleArray(randomRecipes);
 
-        //prepare render data, including user state and recipes
+        //object to pass when rendering ejs
         let renderData = {loggedIn, randomRecipes, username:req.session.userId, cateredRecipes:[]};
 
         if(loggedIn){
@@ -56,14 +54,13 @@ router.get('/', async function(req, res) {
     }
 });
 
-//handle the load-more route to fetch additional recipes
+//handle the load-more route to fetch more recipes
 router.post('/load-more/:offset', isAuthenticated, async function(req, res) {
-    //extract offset parameter from the URL and fetch more recipes
     let offset = req.params.offset;
     res.json(await getCateredRecipes(req, offset));
 })
 
-//fetch catered (personalized) feed for the user
+//fetch catered feed for the user
 async function getCateredRecipes(req, offset = 0){
     try {
         offset = Number(offset); //ensure offset is a number
@@ -94,13 +91,12 @@ async function getCateredRecipes(req, offset = 0){
         let [result1] = await db.query(savedQuery, [req.session.userId]);
         let [result2] = await db.query(spoonacularSavedQuery, [req.session.userId]);
 
-        //combine the two outputs, removing duplicate tags
-        let result = [...new Set([...(result1 || []), ...(result2 || [])])];
+        //combine into one array of tags
+        let result = [...(result1 || []), ...(result2 || [])];
 
         if (result.length > 0) {
             //extract tag names from the results
             let tags = result.map(tagsObj => tagsObj.tag);
-            console.log(tags);
 
             //fetch posts based on the extracted tags
             cateredRecipes = await getPosts({tags, offset});

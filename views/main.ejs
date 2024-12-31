@@ -92,7 +92,6 @@
                     //ensure the response is JSON
                     const contentType = response.headers.get('Content-Type');
                     if (!contentType || !contentType.includes('application/json')) {
-                        console.log(contentType)
                         throw new Error('Received non-JSON response from server.');
                     }
 

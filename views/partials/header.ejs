@@ -1,7 +1,7 @@
 <div class="header">
     <a href="/" class="logo"><span><%=data.siteName.replace(" ","")%></span></a>
     <form action="/search" method="get" class="options">
-        <input type="search" name="q" id="search" placeholder="Search recipes here.." value="<%=typeof(search)!=='undefined'?search.q:''%>">
+        <input style="background-image: url('/images/search_icon.png');" type="search" name="q" id="search" placeholder="Search recipes here.." value="<%=typeof(search)!=='undefined'?search.q:''%>">
     </form>
     <%if(typeof loggedIn !== 'undefined' && loggedIn){%>
         <div class="dropdown account">

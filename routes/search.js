@@ -29,8 +29,6 @@ router.get(
     let page = parseInt(req.query.page);
     let strict = req.query.strict;
 
-    console.log(page)
-
     renderData.foundPosts = [];
     renderData.search = req.query;
 

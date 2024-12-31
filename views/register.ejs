@@ -64,8 +64,6 @@
                     body: JSON.stringify({username:username})
                 });
                 const data = await response.json();
-                console.log(data)
-                console.log(username)
                 if (data.taken) {
                     document.getElementById('usernameAvailability').innerText = 'This username has already been taken'
                     document.getElementById('username').style.borderColor = 'red'

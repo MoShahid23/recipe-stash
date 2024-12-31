@@ -107,7 +107,6 @@ async function getPosts({ title = "", username, tags, from, to, number = 10, off
         obj[tag] = (obj[tag] || 0) + 1; //if tag exists, it will simply increment, otherwise it will initialize as 0 and then increment
         return obj;
     }, {/*begins as empty object*/});
-    console.log(tagWeights)
 
     //SQL query with dynamic filters
     let query = `
@@ -200,8 +199,6 @@ async function getPosts({ title = "", username, tags, from, to, number = 10, off
     }
     query += "GROUP BY r.id ORDER BY tag_match_score DESC LIMIT ? OFFSET ?";
     queryParameters.push(number, offset);
-
-    console.log(query);
 
     //execute the query with parameters
     const [results] = await db.query(query, queryParameters);

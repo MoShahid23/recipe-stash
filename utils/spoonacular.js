@@ -1,14 +1,10 @@
 const axios = require('axios');
 require('dotenv').config(); //load environment variables from .env file
 
-//aPI Key for Spoonacular API
+//API Key for Spoonacular API
 const SPOONACULAR_API_KEY = process.env.SPOONACULAR_API_KEY;
 
-/**
- * Fetches a specified number of random recipes from the Spoonacular API
- * @param {number} number - The number of random recipes to fetch
- * @returns {Array} An array of processed recipe objects
- */
+//fetches a specified number of random recipes from the Spoonacular API
 async function getRandomRecipes(number) {
     const SPOONACULAR_URL = `https://api.spoonacular.com/recipes/random/`;
     let recipesFetched = [];
@@ -34,11 +30,7 @@ async function getRandomRecipes(number) {
     }
 }
 
-/**
- * Fetches detailed information for a single recipe by ID
- * @param {number} id - The ID of the recipe
- * @returns {Object} A processed recipe object
- */
+//fetches detailed information for a single recipe by ID
 async function getRecipe(id) {
     try {
         const SPOONACULAR_URL = `https://api.spoonacular.com/recipes/${id}/information`;
@@ -56,11 +48,7 @@ async function getRecipe(id) {
     }
 }
 
-/**
- * Fetches detailed information for multiple recipes by their IDs
- * @param {string} ids - A comma-separated list of recipe IDs
- * @returns {Array} An array of processed recipe objects
- */
+//fetches detailed information for multiple recipes by their IDs
 async function getRecipeBulk(ids) {
     const SPOONACULAR_URL = `https://api.spoonacular.com/recipes/informationBulk`;
     let recipesFetched = [];
@@ -87,14 +75,7 @@ async function getRecipeBulk(ids) {
     }
 }
 
-/**
- * Processes a recipe object to a custom format
- * - Extracts and normalizes tags
- * - Prepares ingredients and instructions
- * - Associates tags with the recipe in the database
- * @param {Object} recipe - The recipe object from the API
- * @returns {Object} A formatted recipe object
- */
+//processes a recipe object to a custom format
 async function processRecipe(recipe) {
     //combine various tag arrays and normalize
     let tags = [
@@ -103,8 +84,6 @@ async function processRecipe(recipe) {
         ...(recipe.diets || []),
         ...(recipe.occasions || []),
     ];
-
-    console.log(tags);
 
     //sQL queries for inserting tags and associating them with recipes
     let insertTagQuery = `
@@ -162,5 +141,4 @@ async function processRecipe(recipe) {
     };
 }
 
-//export the functions for use in other modules
 module.exports = { getRandomRecipes, getRecipe, getRecipeBulk };

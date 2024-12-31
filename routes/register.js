@@ -71,8 +71,6 @@ router.post(
         const errors = validationResult(req);
         const { username, email, password } = req.body;
 
-        console.log("", username, email);
-
         //if there are validation errors
         if (!errors.isEmpty()) {
             //store error messages and form data in session
@@ -114,8 +112,6 @@ router.post(
             const usernameMatch = results.some((row) => row.username_match);
             const emailMatch = results.some((row) => row.email_match);
 
-            console.log(usernameMatch && emailMatch);
-
             if (usernameMatch && emailMatch) {
                 return res.redirect(global.baseUrl+"/register?formerror=both");
             } else if (usernameMatch) {
@@ -133,7 +129,6 @@ router.post(
 //route for checking if username is taken
 router.post("/taken", async (req, res) => {
     const { username } = req.body;
-    console.log(username);
 
     try {
         const checkQuery = `

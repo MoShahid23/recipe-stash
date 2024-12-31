@@ -74,7 +74,6 @@ a.recipe-credit:hover{
     grid-area: b;
 }
 .header .options input{
-    background-image: url('/images/search_icon.png');
     background-repeat: no-repeat;
     background-position: left center;
     background-position-x: 10px;
