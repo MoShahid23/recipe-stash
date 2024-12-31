@@ -42,11 +42,6 @@ app.locals.data = {siteName: "Recipe Stash"}
 //load the route handlers
 const  { router } = require("./routes/api")
 
-app.use((req, res, next) => {
-    global.baseUrl = `${req.protocol}://${req.get('host')}`;
-    next();
-});
-
 app.use('/api', router)
 
 app.get("/about", (req, res) => {
