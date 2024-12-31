@@ -35,13 +35,21 @@ Ensure you have the following installed (minimum versions tested):
 2. **Set Environment Variables**
    Create a `.env` file in the project root directory and define the following variables:
    ```env
-   SECRET_ARRAY='[]'
-   DB_HOST=
-   DB_USER=
-   DB_PASSWORD=
-   DB_NAME=
-   DB_PASSWORD_ROOT=
-   SPOONACULAR_API_KEY=
+    # Secret key for express-session
+    SECRET_ARRAY='[]'
+
+    # Database Configuration
+    DB_HOST=your-mysql-server-host    # The MySQL server address (e.g., localhost or an IP)
+    DB_USER=your-database-username    # Username for your MySQL user
+    DB_PASSWORD=your-database-password    # Password for your MySQL user
+    DB_NAME=rs_db    # The database name (default is rs_db, can be customized)
+
+    # MySQL root password (used only during mysql database setup in step 4)
+    DB_PASSWORD_ROOT=your-mysql-root-password
+
+    # Spoonacular API Key (get it from Spoonacular's website)
+    SPOONACULAR_API_KEY=your-spoonacular-api-key
+
    ```
 
 3. **Install Dependencies**
